@@ -1408,13 +1408,13 @@ body .layui-layout-admin .site-demo {
 }
 
 .alone-nav .layui-tab-title li {
-    margin-right: 30px;
+    margin-right: 1px;
     padding: 0;
     color: #666;
 }
 
 .alone-nav .layui-tab-title li a {
-    padding: 0 20px;
+    padding: 0 1px;
 }
 
 .alone-download {

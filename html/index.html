@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" media="all">
     <link rel="stylesheet" type="text/css" href="/layui/css/global.css" media="all">
     <link rel="stylesheet" type="text/css" href="/layui/css/modules/code.css" media="all">
+    <script src="https://cdn.bootcdn.net/ajax/libs/marked/2.0.3/marked.js"></script>
 </head>
 
 <body>
@@ -34,22 +35,21 @@
             </div>
         </div>
         <div class="layui-col-md9 layui-col-xs12">
-            <div class="layui-row layui-col-md-offset7" style="margin-top: 50px;">
-                <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <div class="layui-col-md-offset7" style="margin-top: 50px;">
+                <div class="layui-tab layui-tab-brief " lay-filter="docDemoTabBrief">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">HONE</li>
+                        <li class="layui-this">HOME</li>
                         <li>UNITY</li>
-                        <li>CSHARP</li>
                         <li>CHAT-GPT</li>
-                        <li>OHTER</li>
                     </ul>
                 </div>
-                <div class="layui-row layui-col-md-offset2 layui-col-md7 layui-col-xs10">
+                <div class="layui-row layui-col-md-offset2 layui-col-md6 layui-col-xs10">
                     <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="search info"
-                        class="layui-input ">
+                        class="layui-input " id="search_text">
                 </div>
                 <div class="layui-col-md1 layui-col-xs1">
-                    <button type="button" class="layui-btn layui-btn-primary layui-btn-radius" id="search">Search</button>
+                    <button type="button" class="layui-btn layui-btn-primary layui-btn-radius"
+                        id="search">Search</button>
                 </div>
             </div>
             <div class="layui-col-md9 layui-col-xs12" id="list">
@@ -59,31 +59,6 @@
     </div>
 </body>
 <script src="/layui/layui.js" charset="utf-8"></script>
-<script>
-    layui.use('element', function () {
-        var $ = layui.jquery
-            , element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
-        element.on('tab(docDemoTabBrief)', function (elem) {
-
-        });
-        var list = document.getElementById("list")
-        $.ajax({
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "PUT,POST,GET,DELETE,OPTIONS"
-            },
-            contentType: "application/text",
-            type: "GET",
-            url: "https://localhost:7167/api/web",
-
-            success: function (data) {
-                list.innerHTML = data
-            }
-        })
-        $(document).on('click', "#search", function () {
-            layer.msg("按钮点击");
-        });
-    })
-</script>
+<script src="/index.js"></script>
 
 </html>

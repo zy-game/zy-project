@@ -447,11 +447,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\WebService\\WebService\\WebService.csproj",
+      "projectUniqueName": "D:\\zy-project\\WebService\\WebService\\WebService.csproj",
       "projectName": "WebService",
-      "projectPath": "D:\\WebService\\WebService\\WebService.csproj",
+      "projectPath": "D:\\zy-project\\WebService\\WebService\\WebService.csproj",
       "packagesPath": "C:\\Users\\15849\\.nuget\\packages\\",
-      "outputPath": "D:\\WebService\\WebService\\obj\\",
+      "outputPath": "D:\\zy-project\\WebService\\WebService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Soft\\Microsoft Shared\\NuGetPackages"
