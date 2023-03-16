@@ -1,71 +1,76 @@
-var $;
-
+import('./help.js')
+window.url = "http:127.0.0.1:5001/api/"
 layui.use('element', function () {
-    $ = layui.jquery
-        , element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
-    var list = document.getElementById("list")
-    element.on('tab(docDemoTabBrief)', function (elem) {
-
-        //window.alert(elem.index)
+    window.$ = layui.jquery, element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+    element.on('tab(__tab)', function (elem) {
+        OnSwitchPages(elem.index)
     });
-
-
-    $.ajax({
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "PUT,POST,GET,DELETE,OPTIONS"
-        },
-        contentType: "application/text",
-        type: "GET",
-        url: "https://localhost:7167/api/web",
-
-        success: function (data) {
-            resetBodyList(data)
-        }
-    })
-
-    $(document).on('click', "#search", function () {
+    window.$(document).on('click', "#btn_search", function () {
         onSearchText(document.getElementById("search_text").value)
     });
-
+    window.$(document).on('click', "#btn_chat_gpt", function () {
+        GetChatGPTResponse(document.getElementById("chat_gpt_input").value)
+    });
 })
+function OnSwitchPages(index) {
+    switch (index) {
+        case 0:
+            ShowHomePage()
+            break
+        case 1:
+            ShowHomePage()
+            break
+        case 1:
+            ShowHomePage()
+            break
+        case 3:
+            ShowChatGPTPage()
+            break
+        case 4:
+            ShowChatGPTPage()
+            break
+    }
+}
 
 function onSearchText(str) {
     console.log(str)
 }
-
-function resetBodyList(data) {
-    let jsonList = JSON.parse(data)
-    var result = "";
-    for (i = 0; i < jsonList.length; i++) {
-        temp_id = jsonList[i].id
-        result += "<li class=\"layui-timeline-item\">";
-        result += "<i class=\"layui-icon layui-timeline-axis\">&#xe63f; </i>";
-        result += "<div class=\"layui-timeline-content layui-text\">";
-        result += "<h3 class=\"layui-timeline-title\">";
-        result += "<a id=\"test_" + temp_id + "\" href=\"javascript:;\" οnclick=\"onInfo(" + jsonList[i].id + ")\">" + jsonList[i].title + "</a>";
-        result += "</h3><p>" + jsonList[i].simple + "</p></div ></li > ";
-    }
-    list.innerHTML = result
-    for (i = 0; i < jsonList.length; i++) {
-        let temp_id = jsonList[i].id
-        $(document).on("click", "#test_" + temp_id, function () {
-            onInfo(temp_id)
-        })
-    }
+function ShowUnityPage() {
+    document.getElementById("chat").style.display = "none"
 }
 
-function onInfo(id) {
-    $.ajax({
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "PUT,POST,GET,DELETE,OPTIONS"
-        },
-        contentType: "application/text",
-        type: "GET",
-        url: "https://localhost:7167/api/web/" + id,
-        success: function (data) {
-            list.innerHTML = data
+function ShowChatGPTPage() {
+    document.getElementById("chat").style.display = "block"
+}
+
+function GetChatGPTResponse(input) {
+    if (String(input).length <= 0) {
+        window.alert("先输入提示语，在开始玩耍！")
+        return
+    }
+    get("chatgpt/" + input, function (args) {
+    })
+}
+
+function ShowHomePage() {
+    document.getElementById("chat").style.display = "none"
+    get("web", function (args) {
+        var list = document.getElementById("list")
+        // for (i = 0; i < list.childElementCount; i++) {
+        //     list.removeChild(list.childNodes[i])
+        // }
+        let jsonList = JSON.parse(data)
+        var result = "";
+        for (i = 0; i < jsonList.length; i++) {
+            result += getTimelineItemString(jsonList[i])
+        }
+        list.innerHTML = result
+        for (i = 0; i < jsonList.length; i++) {
+            let temp_id = jsonList[i].id
+            $(document).on("click", "#test_" + temp_id, function () {
+                get("web/" + id, function (args) {
+                })
+            })
         }
     })
 }

@@ -1018,16 +1018,16 @@ a cite {
 }
 
 .layui-layout-admin .layui-footer {
-    position: fixed;
-    left: 200px;
+    position: absolute;
+    left: 0;
     right: 0;
     bottom: 0;
     z-index: 990;
-    height: 44px;
+    height: 50px;
     line-height: 44px;
     padding: 0 15px;
     box-shadow: -1px 0 4px rgb(0 0 0 / 12%);
-    background-color: #fafafa
+    background-color: #ff0000
 }
 
 .layui-layout-admin .layui-logo {
@@ -4619,7 +4619,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-tab {
-    margin: 10px 0;
+    margin: 20px 0;
     text-align: left !important
 }
 
@@ -4629,7 +4629,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tab-title {
     position: relative;
-    left: 0;
+    left: 10px;
     height: 20px;
     white-space: nowrap;
     font-size: 0;
@@ -4660,7 +4660,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tab-title li a {
     display: block;
-    padding: 0 5px;
+    padding: 0 10px;
     margin: 0 -15px
 }
 
@@ -4670,7 +4670,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tab-title .layui-this:after {
     position: absolute;
-    left: 0;
+    left: 0px;
     top: 0;
     content: "";
     width: 100%;
@@ -4688,7 +4688,7 @@ body .layui-table-tips .layui-layer-content {
     right: 0;
     top: 0;
     z-index: 10;
-    width: 30px;
+    width: 40px;
     height: 39px;
     line-height: 39px;
     border-width: 1px;
@@ -4734,7 +4734,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-tab-content {
-    padding: 15px 0
+    padding: 20px 0
 }
 
 .layui-tab-title li .layui-tab-close {
@@ -4924,7 +4924,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tab-title .layui-badge,
 .layui-tab-title .layui-badge-dot {
-    left: 5px;
+    left: 15px;
     top: -2px
 }
 

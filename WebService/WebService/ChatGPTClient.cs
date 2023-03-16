@@ -5,69 +5,43 @@ public class ChatGPTClient
 {
     private const string endpoint = "https://api.openai.com/v1/engines/text-moderation-playground/completions";
 
-    private readonly string apiKey;
+    private string apiKey = "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";
 
-    public ChatGPTClient(string apiKey)
+    private string sessionId = string.Empty;
+    private HttpClient client;
+    private int maxTokens = 50;
+    public static ChatGPTClient instance { get; } = new ChatGPTClient();
+    public ChatGPTClient()
     {
-        this.apiKey = apiKey;
+        client = new HttpClient();
     }
-
     public async Task<string> GenerateTextAsync(string prompt)
     {
-        using (HttpClient client = new HttpClient())
+        string result = string.Empty;
+        var request = new HttpRequestMessage
         {
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-            string reqult = prompt;
-            while (true)
+            Method = HttpMethod.Post,
+            RequestUri = new Uri("https://api.openai.com/v1/completions"),
+            Headers =
             {
-                var requestBody = new
-                {
-                    prompt = reqult,
-                    temperature = 0.7,
-                    max_tokens = 50,
-                    top_p = 1,
-                    frequency_penalty = 0,
-                    presence_penalty = 0,
-                    stop = "##END##"
-                };
-                var requestContent = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(endpoint, requestContent, CancellationToken.None);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return "error:" + response.StatusCode.ToString();
-                }
-                string responseContent = await response.Content.ReadAsStringAsync();
-                var json = JObject.Parse(responseContent);
-                reqult += json["choices"][0]["text"];
-                //                  reqult += responseContent;
-                //                  {
-                //                      "id": "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7",
-                //"object": "text_completion",
-                //"created": 1589478378,
-                //"model": "text-davinci-003",
-                //"choices": [
-                //  {
-                //                          "text": "\n\nThis is indeed a test",
-                //    "index": 0,
-                //    "logprobs": null,
-                //    "finish_reason": "length"
-                //  }
-                //],
-                //"usage": {
-                //                          "prompt_tokens": 5,
-                //  "completion_tokens": 7,
-                //  "total_tokens": 12
-                //}
-                //                  }
-                // Check for termination condition here, e.g. a specific response from the API
-                string state = json["choices"][0]["finish_reason"].ToString();
-                if (state == "stop")
-                {
-                    break;
-                }
-                Thread.Sleep(100);
-            }
-            return reqult;
+                { "Authorization", $"Bearer {apiKey}" },
+            },
+            Content = new StringContent($"{{\"prompt\": \"{prompt}\",\"model\": \"text-davinci-003\", \"max_tokens\": {maxTokens},  \"stream\": true}}", Encoding.UTF8, "application/json")
+        };
+
+        // 3. 发送请求并获取响应流
+        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        var responseStream = await response.Content.ReadAsStreamAsync();
+
+        // 4. 处理响应流
+        var reader = new StreamReader(responseStream);
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync();
+
+            Console.WriteLine(line);
+            result += line;
         }
+        return result;
     }
 }

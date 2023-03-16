@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "wAJfqBhQg195DTvl8y/IZbqfU+4xmKM479oBbmHg1J1Kk/rJYBJ9lwlrZOiVgbMjlWi67So53IKl2SPU+ULq7A==",
+  "success": true,
+  "projectFilePath": "D:\\zy-project\\WebService\\WebService\\WebService.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.aspnetcore.authentication.negotiate\\6.0.5\\microsoft.aspnetcore.authentication.negotiate.6.0.5.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\6.0.5\\microsoft.aspnetcore.connections.abstractions.6.0.5.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.extensions.features\\6.0.5\\microsoft.extensions.features.6.0.5.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.2.3\\swashbuckle.aspnetcore.swaggerui.6.2.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\system.directoryservices.protocols\\6.0.1\\system.directoryservices.protocols.6.0.1.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\system.io.pipelines\\6.0.3\\system.io.pipelines.6.0.3.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\6.0.5\\microsoft.netcore.app.runtime.win-x86.6.0.5.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\6.0.5\\microsoft.windowsdesktop.app.runtime.win-x86.6.0.5.nupkg.sha512",
+    "C:\\Users\\15849\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\6.0.5\\microsoft.aspnetcore.app.runtime.win-x86.6.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -13,52 +13,63 @@
     <script src="https://hm.baidu.com/hm.js?c995e6552ece61f85c239b001a16d2d8"></script>
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" media="all">
-    <link rel="stylesheet" type="text/css" href="/layui/css/global.css" media="all">
     <link rel="stylesheet" type="text/css" href="/layui/css/modules/code.css" media="all">
     <script src="https://cdn.bootcdn.net/ajax/libs/marked/2.0.3/marked.js"></script>
 </head>
 
 <body>
-    <div class="layui-layout layui-row layui-layout-admin">
-        <div class="layui-col-md3 layui-col-xs12">
-            <img src="https://base-1251268098.cos.ap-chengdu.myqcloud.com/20230304232010.png" class="layui-circle"
-                height="25%" width="25%" style="margin-top: 50px; margin-left: 37.25%;">
-            <div style="margin-top: 15px; margin-left: 45%;" id="__name">
-                <i> 刺、青</i>
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-body" style="left: 0%;">
+            <div class="layui-col-md3 layui-col-xs12">
+                <img src="https://base-1251268098.cos.ap-chengdu.myqcloud.com/20230304232010.png" class="layui-circle"
+                    height="25%" width="25%" style="margin-top: 50px; margin-left: 37.25%;">
+                <div style="margin-top: 15px; margin-left: 45%;" id="__name">
+                    <i> 刺、青</i>
+                </div>
+                <hr class="layui-border-orange" width="30%" style="margin-top: 5px; margin-left: 35%;">
+                <div style="margin-top: 10px; margin-left: 35%;" id="__git">
+                    <a href="https://github.com/zy-game/">
+                        <img src="https://github.githubassets.com/apple-touch-icon-144x144.png" class="layui-circle"
+                            height="10%" width="10%" style="margin-top: 5px; margin-left: 18%;">
+                    </a>
+                </div>
             </div>
-            <hr class="layui-border-orange" width="30%" style="margin-top: 5px; margin-left: 35%;">
-            <div style="margin-top: 10px; margin-left: 35%;" id="__git">
-                <a href="https://github.com/zy-game/">
-                    <img src="https://github.githubassets.com/apple-touch-icon-144x144.png" class="layui-circle"
-                        height="10%" width="10%" style="margin-top: 5px; margin-left: 18%;">
-                </a>
-            </div>
-        </div>
-        <div class="layui-col-md9 layui-col-xs12">
-            <div class="layui-col-md-offset7" style="margin-top: 50px;">
-                <div class="layui-tab layui-tab-brief " lay-filter="docDemoTabBrief">
+            <div class="layui-col-md9 layui-col-xs12" ">
+                <div class=" layui-col-md-offset7">
+                <div class="layui-tab layui-tab-brief " lay-filter="__tab">
                     <ul class="layui-tab-title">
                         <li class="layui-this">HOME</li>
                         <li>UNITY</li>
+                        <li>C#</li>
                         <li>CHAT-GPT</li>
+                        <li>OHTER</li>
                     </ul>
                 </div>
-                <div class="layui-row layui-col-md-offset2 layui-col-md6 layui-col-xs10">
+                <div class="layui-row layui-col-md-offset2 layui-col-xs-offset2 layui-col-md6 layui-col-xs7">
                     <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="search info"
                         class="layui-input " id="search_text">
                 </div>
                 <div class="layui-col-md1 layui-col-xs1">
                     <button type="button" class="layui-btn layui-btn-primary layui-btn-radius"
-                        id="search">Search</button>
+                        id="btn_search">Search</button>
                 </div>
             </div>
-            <div class="layui-col-md9 layui-col-xs12" id="list">
+            <div class="layui-timeline layui-col-md9 layui-col-xs12" id="list">
 
             </div>
+
         </div>
+    </div>
+    <div id="chat" class="layui-footer"
+        style="position: fixed; bottom: 0;background-color:#dddddd00; width:100%; display:none">
+        <textarea placeholder="请输入内容" class="layui-input"
+            style="width: 80%; position: fixed; bottom: 5px; left: 1dvw;" id="chat_gpt_input"></textarea>
+        <button id="btn_chat_gpt" type="button" class="layui-btn layui-btn-normal layui-btn-radius"
+            style="position: fixed;right: 1dvw;bottom: 5px;">确认</button>
     </div>
 </body>
 <script src="/layui/layui.js" charset="utf-8"></script>
+<script src="/help.js"></script>
 <script src="/index.js"></script>
 
 </html>

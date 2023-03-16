@@ -4,9 +4,9 @@
 
 namespace WebService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/web")]
     [ApiController]
-    public class web : ControllerBase
+    public class Web : ControllerBase
     {
         // GET: api/<Web>
         [HttpGet]
@@ -17,7 +17,7 @@ namespace WebService.Controllers
             {
                 list.Add(new
                 {
-                    id =i,
+                    id = i,
                     title = "test" + i,
                     time = DateTime.Now.Ticks,
                     simple = "hahahhahhaha",
@@ -49,6 +49,17 @@ namespace WebService.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+    }
+
+    [Route("api/chatgpt")]
+    [ApiController]
+    public class chatgpt : ControllerBase
+    {
+        [HttpGet]
+        public async Task<string> Get(string input)
+        {
+            return await ChatGPTClient.instance.GenerateTextAsync(input);
         }
     }
 }
