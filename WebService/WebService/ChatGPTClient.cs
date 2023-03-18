@@ -9,7 +9,7 @@ public class ChatGPTClient
 
     private string sessionId = string.Empty;
     private HttpClient client;
-    private int maxTokens = 50;
+    private int maxTokens = 200;
     public static ChatGPTClient instance { get; } = new ChatGPTClient();
     public ChatGPTClient()
     {
@@ -26,7 +26,8 @@ public class ChatGPTClient
             {
                 { "Authorization", $"Bearer {apiKey}" },
             },
-            Content = new StringContent($"{{\"prompt\": \"{prompt}\",\"model\": \"text-davinci-003\", \"max_tokens\": {maxTokens},  \"stream\": true}}", Encoding.UTF8, "application/json")
+
+            Content = new StringContent("{\"model\":\"text-davinci-003\",\"prompt\":\"" + prompt + "\",\"max_tokens\":200,\"temperature\":0.75,\"top_p\":1,\"stream\":true,\"logprobs\":null,\"stop\": \"###\"}", Encoding.UTF8, "application/json")
         };
 
         // 3. 发送请求并获取响应流
@@ -38,9 +39,24 @@ public class ChatGPTClient
         while (!reader.EndOfStream)
         {
             var line = await reader.ReadLineAsync();
+            if (line.Length > 5)
+            {
+                line = line.Substring(5, line.Length - 5);
+                try
+                {
+                    var json = JObject.Parse(line);
 
-            Console.WriteLine(line);
-            result += line;
+                    Console.WriteLine(line);
+                    if (json != null)
+                    {
+                        result += json["choices"][0]["text"];
+                    }
+                }
+                catch
+                {
+
+                }
+            }
         }
         return result;
     }

@@ -442,19 +442,19 @@
   },
   "packageFolders": {
     "C:\\Users\\15849\\.nuget\\packages\\": {},
-    "D:\\Soft\\Microsoft Shared\\NuGetPackages": {}
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\zy-project\\WebService\\WebService\\WebService.csproj",
+      "projectUniqueName": "E:\\zy-project\\WebService\\WebService\\WebService.csproj",
       "projectName": "WebService",
-      "projectPath": "D:\\zy-project\\WebService\\WebService\\WebService.csproj",
+      "projectPath": "E:\\zy-project\\WebService\\WebService\\WebService.csproj",
       "packagesPath": "C:\\Users\\15849\\.nuget\\packages\\",
-      "outputPath": "D:\\zy-project\\WebService\\WebService\\obj\\",
+      "outputPath": "E:\\zy-project\\WebService\\WebService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "D:\\Soft\\Microsoft Shared\\NuGetPackages"
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
         "C:\\Users\\15849\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -515,7 +515,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
       }
     }
   }
