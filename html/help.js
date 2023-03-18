@@ -32,7 +32,7 @@ function getTimelineItemString(item) {
     let result = '<li class="layui-timeline-item">'
     result += '<i class="layui-icon layui-timeline-axis"></i>'
     result += '<div class="layui-timeline-content layui-text">'
-    result += '<a id="test_' + item.id + 'href="javascript:;" οnclick="onInfo(' + item.id + ')">'
+    result += '<a id="' + item.id + ' href="javascript:;" οnclick="onInfo(' + item.id + ')">'
     result += '<h3 class="layui-timeline-title">' + item.title + '</h3>'
     result += '</a>'
     result += '<p>' + item.simple + '</p>'

@@ -4652,7 +4652,7 @@ body .layui-table-tips .layui-layer-content {
 .layui-tab-title li {
     position: relative;
     line-height: 20px;
-    min-width: 15px;
+    min-width: 50px;
     padding: 0 5px;
     text-align: center;
     cursor: pointer
@@ -4688,7 +4688,7 @@ body .layui-table-tips .layui-layer-content {
     right: 0;
     top: 0;
     z-index: 10;
-    width: 40px;
+    width: 60px;
     height: 39px;
     line-height: 39px;
     border-width: 1px;

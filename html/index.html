@@ -18,11 +18,11 @@
 </head>
 
 <body>
-    <div class="layui-layout layui-layout-admin">
+    <div class="layui-layout">
         <div class="layui-body" style="left: 0%;">
-            <div class="layui-col-md3 layui-col-xs12">
+            <div class="layui-col-md3 layui-col-xs12 ">
                 <img src="https://base-1251268098.cos.ap-chengdu.myqcloud.com/20230304232010.png" class="layui-circle"
-                    height="25%" width="25%" style="margin-top: 50px; margin-left: 37.25%;">
+                    height="25%" width="25%" style="margin-left: 37.25%;">
                 <div style="margin-top: 15px; margin-left: 45%;" id="__name">
                     <i> 刺、青</i>
                 </div>
@@ -34,9 +34,8 @@
                     </a>
                 </div>
             </div>
-            <div class="layui-col-md9 layui-col-xs12" ">
-                <div class=" layui-col-md-offset7">
-                <div class="layui-tab layui-tab-brief " lay-filter="__tab">
+            <div class="layui-col-md9 layui-col-xs12">
+                <div class="layui-tab layui-tab-brief " lay-filter="__tab" style="position:absolute; right: 50px;">
                     <ul class="layui-tab-title">
                         <li class="layui-this">HOME</li>
                         <li>UNITY</li>
@@ -45,27 +44,29 @@
                         <li>OHTER</li>
                     </ul>
                 </div>
-                <div class="layui-row layui-col-md-offset2 layui-col-xs-offset2 layui-col-md6 layui-col-xs7">
+                <div class="layui-row " style="position: absolute; top:60px;width:100%">
                     <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="search info"
-                        class="layui-input " id="search_text">
+                        class="layui-input " id="search_text" style="position:absolute; right: 140px;width: 200px;">
+                    <button type="button" class="layui-btn layui-btn-primary layui-btn-radius" id="btn_search"
+                        style="position:absolute; right: 50px;">Search</button>
+
                 </div>
-                <div class="layui-col-md1 layui-col-xs1">
-                    <button type="button" class="layui-btn layui-btn-primary layui-btn-radius"
-                        id="btn_search">Search</button>
-                </div>
+
             </div>
-            <div class="layui-timeline layui-col-md9 layui-col-xs12" id="list">
+            <div class="layui-timeline layui-col-md9 layui-col-xs12" id="list" style="top: 120px;">
 
             </div>
 
         </div>
     </div>
-    <div id="chat" class="layui-footer"
-        style="position: fixed; bottom: 0;background-color:#dddddd00; width:100%; display:none">
-        <textarea placeholder="请输入内容" class="layui-input"
-            style="width: 80%; position: fixed; bottom: 5px; left: 1dvw;" id="chat_gpt_input"></textarea>
+    <div id="chat" class="layui-footer layui-row"
+        style="position: fixed; bottom: 10px;background-color:#e2e2e2; width:100%;height:50px; display:none">
+        <div class="layui-input-block">
+            <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入提示语"
+                class="layui-input" style="position: fixed;max-width:80%;bottom: 15px;right: 75px;" id="chat_gpt_input">
+        </div>
         <button id="btn_chat_gpt" type="button" class="layui-btn layui-btn-normal layui-btn-radius"
-            style="position: fixed;right: 1dvw;bottom: 5px;">确认</button>
+            style="position: fixed;right: 1dvw;bottom: 15px;">确认</button>
     </div>
 </body>
 <script src="/layui/layui.js" charset="utf-8"></script>
