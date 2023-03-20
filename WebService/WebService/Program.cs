@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Negotiate;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +9,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-   .AddNegotiate();
+//builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+//   .AddNegotiate();
 
 builder.Services.AddAuthorization(options =>
 {
