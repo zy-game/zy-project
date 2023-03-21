@@ -31,7 +31,7 @@ function OnGetChatGPTData() {
         window.alert("先输入提示语，在开始玩耍！")
         return
     }
-    help.get("chatgpt/" + input, function (args) {
+    request("chatgpt/code" + input, function (args) {
     })
 }
 function ShowCsharpView() {
@@ -48,7 +48,7 @@ function onSearchText() {
     if (String(input).length <= 0) {
         return
     }
-    help.get("search/" + input, function (args) {
+    request("search/" + input, function (args) {
     })
 }
 
@@ -62,7 +62,7 @@ function ShowChatGPTView() {
 
 function ShowHomeView() {
     document.getElementById("chat").style.display = "none"
-    get("web", function (args) {
+    request("web", function (args) {
         var list = document.getElementById("list")
         // for (i = 0; i < list.childElementCount; i++) {
         //     list.removeChild(list.childNodes[i])
@@ -76,7 +76,7 @@ function ShowHomeView() {
         for (i = 0; i < jsonList.length; i++) {
             let temp_id = jsonList[i].id
             $(document).on("click", "#" + temp_id, function () {
-                get("web/" + id, function (args) {
+                request("web/" + id, function (args) {
                 })
             })
         }

@@ -1,4 +1,4 @@
-function get(apiName, func) {
+function request(apiName, func) {
     window.$.ajax({
         headers: {
             "Access-Control-Allow-Origin": "*",
@@ -13,7 +13,7 @@ function get(apiName, func) {
     })
 }
 
-function get2(apiName, data, func) {
+function request2(apiName, data, func) {
     window.$.ajax({
         headers: {
             "Access-Control-Allow-Origin": "*",

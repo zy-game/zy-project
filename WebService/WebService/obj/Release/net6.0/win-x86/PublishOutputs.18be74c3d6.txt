@@ -1,6 +1,0 @@
-D:\zy-project\WebService\WebService\obj\Release\net6.0\win-x86\PubTmp\Out\.filenesting.json
-D:\zy-project\WebService\WebService\obj\Release\net6.0\win-x86\PubTmp\Out\appsettings.Development.json
-D:\zy-project\WebService\WebService\obj\Release\net6.0\win-x86\PubTmp\Out\appsettings.json
-D:\zy-project\WebService\WebService\obj\Release\net6.0\win-x86\PubTmp\Out\WebService.pdb
-D:\zy-project\WebService\WebService\obj\Release\net6.0\win-x86\PubTmp\Out\aspnetcorev2_inprocess.dll
-D:\zy-project\WebService\WebService\obj\Release\net6.0\win-x86\PubTmp\Out\WebService.exe
