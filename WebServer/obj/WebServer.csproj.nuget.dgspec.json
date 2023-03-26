@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\zy-project\\WebServer\\WebServer.csproj": {}
+    "D:\\zy-project\\WebServer\\WebServer.csproj": {}
   },
   "projects": {
-    "d:\\zy-project\\WebServer\\WebServer.csproj": {
+    "D:\\zy-project\\WebServer\\WebServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\zy-project\\WebServer\\WebServer.csproj",
+        "projectUniqueName": "D:\\zy-project\\WebServer\\WebServer.csproj",
         "projectName": "WebServer",
-        "projectPath": "d:\\zy-project\\WebServer\\WebServer.csproj",
+        "projectPath": "D:\\zy-project\\WebServer\\WebServer.csproj",
         "packagesPath": "C:\\Users\\15849\\.nuget\\packages\\",
-        "outputPath": "d:\\zy-project\\WebServer\\obj\\",
+        "outputPath": "D:\\zy-project\\WebServer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Soft\\Microsoft Shared\\NuGetPackages"

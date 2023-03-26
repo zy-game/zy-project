@@ -1,157 +1,76 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Immutable;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebServer
 {
-    [Route("api/chat-gpt")]
-    [Authorize]
-    [ApiController]
-    public class ChatGPT : ControllerBase
+    public class SessionDatable
     {
+        public string _id;
+        public string title;
+        public List<Role> chats;
+    }
+    public class Role
+    {
+        public string role;
+        public string content;
+    }
+    public class GPTSession : IDisposable
+    {
+
+        public string id { get; private set; }
+        public string title { get; private set; }
+        public List<Role> chats { get; private set; }
+        private HttpClient client = new HttpClient();
         private string apiKey = "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";
-        private static HttpClient client = new HttpClient();
-        class ChatSession
+        private static List<GPTSession> sessions = new List<GPTSession>();
+        public static GPTSession AddSession(SessionDatable datable)
         {
-            public string _id;
-            public string title;
-            public List<string> chats;
-        }
-        [HttpGet]
-        public string Chats()
-        {
-            List<ChatSession> sessions = Mongo.Where<ChatSession>(Builders<ChatSession>.Filter.Empty);
-            return Newtonsoft.Json.JsonConvert.SerializeObject(sessions);
+            GPTSession session = new GPTSession() { id = datable._id, title = datable.title, chats = datable.chats };
+            sessions.Add(session);
+            return session;
         }
 
-
-
-        [HttpGet("code/{msg}")]
-        public async Task<string> Get(string msg)
+        public static GPTSession FindSession(string id)
         {
-            return await GetCompletionResponse(msg, 100, 1);
+            return sessions.Find(x => x.id == id);
         }
 
-        async Task<string> GetCompletionResponse(string msg, int token, float temperature)
+        public static void RemoveSession(string id)
         {
-            string result = string.Empty;
-            var message2 = new
+            GPTSession session = FindSession(id);
+            if (session == null)
             {
-                model = "text-davinci-003",
-                prompt = msg,
-                temperature = 1,
-                max_tokens = token,
-                top_p = 1,
-                n = 1,
-                stream = true,
-                stop = "######"
-            };
-            var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri("https://api.openai.com/v1/completions"),
-                Headers =
-                {
-                    { "Authorization", $"Bearer {apiKey}" },
-                },
-
-                Content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(message2), Encoding.UTF8, "application/json")
-            };
-            using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
-            {
-                using (var responseStream = await response.Content.ReadAsStreamAsync())
-                {
-                    using (var reader = new StreamReader(responseStream))
-                    {
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            return await reader.ReadToEndAsync();
-                        }
-                        var resultBuilder = new StringBuilder();
-                        string line;
-                        while (!reader.EndOfStream)
-                        {
-                            line = await reader.ReadLineAsync();
-                            if (line.StartsWith("data: [DONE]"))
-                            {
-                                break;
-                            }
-                            if (line.Length < 5)
-                            {
-                                continue;
-                            }
-                            try
-                            {
-                                Console.WriteLine(line);
-                                string temp = line.Substring(5);
-                                Completions completions = Newtonsoft.Json.JsonConvert.DeserializeObject<Completions>(temp);
-                                if (completions.choices != null && completions.choices.Count > 0)
-                                {
-                                    resultBuilder.Append(completions.choices[0].text);
-                                }
-                                if (completions.choices[0].finish_reason != null && completions.choices[0].finish_reason == "length")
-                                {
-                                    resultBuilder.Clear();
-                                    return await GetCompletionResponse(msg, token + 100, temperature);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-
-                            }
-                        }
-
-                        result = resultBuilder.ToString();
-                    }
-
-                }
+                return;
             }
-            return result;
+            Mongo.DeleteDocument<SessionDatable>(Builders<SessionDatable>.Filter.Eq("_id", session.id));
         }
-
-        public static List<string> history = new List<string>();
-
-        [HttpGet("chat/{msg}")]
-        public async Task<string> ChatCompletions(string msg)
+        public async Task<string> Question(string text)
         {
             string result = string.Empty;
-
+            chats.Add(new Role() { role = "user", content = text });
+            if (chats.Count > 4)
+            {
+                chats.Remove(chats.First());
+            }
             var message = new
             {
                 model = "gpt-3.5-turbo",
                 temperature = 1f,
-                messages = new List<object>()
+                messages = chats
             };
-            message.messages.Add(new { role = "system", content = "你是一个有用的助手" });
-            message.messages.Add(new { role = "assistant", content = "好的" });
-            history.Add(msg);
-            for (int i = 0; i < history.Count; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    message.messages.Add(new { role = "user", content = history[i] });
-                }
-                else
-                {
-                    message.messages.Add(new { role = "assistant", content = history[i] });
-                }
-            }
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(message));
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri("https://api.openai.com/v1/chat/completions"),
-                Headers =
-                {
-                    { "Authorization", $"Bearer {apiKey}" },
-                },
-                Content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json")
+                Headers = { { "Authorization", $"Bearer {apiKey}" } },
+                Content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json")
             };
             using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
             {
@@ -165,155 +84,260 @@ namespace WebServer
                         }
                         var resultBuilder = new StringBuilder();
                         string line;
-                        while (!reader.EndOfStream)
+                        while ((line = await reader.ReadLineAsync()) != null)
                         {
-                            line = await reader.ReadLineAsync();
-                            if (line.StartsWith("data: [DONE]"))
-                            {
-                                break;
-                            }
-                            if (line.Length < 5)
-                            {
-                                continue;
-                            }
-                            if (line.Length < 5)
+                            if (line.StartsWith("data: [DONE]") || line.Length < 5)
                             {
                                 continue;
                             }
                             try
                             {
-                                ChatResponse chatResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ChatResponse>(line);
-                                if (chatResponse.choices != null && chatResponse.choices.Count > 0)
+                                ChatResponse chatResponse = JsonConvert.DeserializeObject<ChatResponse>(line);
+                                if (chatResponse.choices?.Count > 0)
                                 {
                                     resultBuilder.Append(chatResponse.choices[0].message.content);
                                 }
                             }
                             catch (Exception e)
                             {
-
+                                Console.WriteLine(e);
                             }
                         }
                         result = resultBuilder.ToString();
                     }
-
                 }
             }
-
-            history.Add(result);
-
+            chats.Add(new Role() { role = "assistant", content = result });
             return result;
         }
 
-        public class Completions
+        public void Dispose()
         {
-            /// <summary>
-            /// 
-            /// </summary>
-            public string id { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string @object { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public int created { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public List<Choices> choices { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string model { get; set; }
+            Mongo.UpsertDocument<SessionDatable>(Builders<SessionDatable>.Filter.Eq("_id", id), new SessionDatable() { _id = id, title = title, chats = chats });
+        }
+    }
+    [Route("api/chat-gpt")]
+    //[Authorize]
+    [ApiController]
+    public class ChatGPT : ControllerBase
+    {
+        private string apiKey = "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";
+        private static HttpClient client = new HttpClient();
+
+        [HttpGet("list")]
+        public string Chats()
+        {
+            List<SessionDatable> sessions = Mongo.Where<SessionDatable>(Builders<SessionDatable>.Filter.Empty);
+            if (sessions == null || sessions.Count == 0)
+            {
+                return "{}";
+            }
+            List<object> result = new List<object>();
+            string resu = string.Empty;
+            for (var i = 0; i < sessions.Count; i++)
+            {
+                var session = GPTSession.AddSession(sessions[i]);
+                resu += "<li class=\"layui-timeline-item\">";
+                resu += "<i class=\"layui-icon layui-timeline-axis\"></i>";
+                resu += "<div class=\"layui-timeline-content layui-text\">";
+                resu += $"<a id=\" {session.id} href = \"javascript:;\" οnclick = \"onInfo({session.id})\">";
+                resu += $"<h3 class=\"layui-timeline-title\">{session.title}</h3>";
+                resu += "</a>";
+                resu += $"<p>{session.chats?.Last()?.content?[..200]}</p>";
+                resu += "<ul>";
+                resu += "</ul>";
+                resu += "</div>";
+                resu += "</li>";
+            }
+            return Newtonsoft.Json.JsonConvert.SerializeObject(result);
         }
 
-        public class Choices
+        [HttpGet("code/{msg}")]
+        public async Task<string> Get(string msg)
         {
-            /// <summary>
-            /// 
-            /// </summary>
-            public string text { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public int index { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string logprobs { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string finish_reason { get; set; }
+            int token = 100;
+            async Task<string> GetRespnse()
+            {
+                string result = string.Empty;
+                var message2 = new
+                {
+                    model = "text-davinci-003",
+                    prompt = msg,
+                    temperature = 1,
+                    max_tokens = token,
+                    stream = true,
+                };
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/completions");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                request.Content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(message2), Encoding.UTF8, "application/json");
+                using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
+                using (var responseStream = await response.Content.ReadAsStreamAsync())
+                using (var reader = new StreamReader(responseStream))
+                {
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                    var resultBuilder = new StringBuilder();
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        if (line.StartsWith("data: [DONE]") || line.Length < 5)
+                        {
+                            break;
+                        }
+                        try
+                        {
+                            string temp = line.Substring(5);
+                            Completions completions = Newtonsoft.Json.JsonConvert.DeserializeObject<Completions>(temp);
+                            if (completions.choices != null && completions.choices.Count > 0)
+                            {
+                                resultBuilder.Append(completions.choices[0].text);
+                            }
+                            if (completions.choices[0].finish_reason != null && completions.choices[0].finish_reason == "length")
+                            {
+                                resultBuilder.Clear();
+                                token += 100;
+                                return await GetRespnse();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            // Handle exception.
+                        }
+                    }
+                    result = resultBuilder.ToString();
+                }
+                return result;
+            }
+            return await GetRespnse();
         }
 
-        public class Message
+        [HttpGet("chat/{msg}")]
+        public async Task<string> ChatCompletions(string msg)
         {
-            /// <summary>
-            /// 
-            /// </summary>
-            public string role { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string content { get; set; }
+            string session_id = string.Empty;
+            if (Request.Headers.ContainsKey("session_id"))
+            {
+                session_id = Request.Headers["session_id"];
+            }
+            GPTSession session = GPTSession.FindSession(session_id);
+            if (session == null)
+            {
+                session = GPTSession.AddSession(new SessionDatable() { title = msg[..20], chats = new List<Role>() });
+            }
+            return await session.Question(msg);
         }
+    }
+    public class Completions
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string id { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string @object { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int created { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<Choices> choices { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string model { get; set; }
+    }
 
-        public class ChoicesItem
-        {
-            /// <summary>
-            /// 
-            /// </summary>
-            public int index { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public Message message { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string finish_reason { get; set; }
-        }
+    public class Choices
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string text { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int index { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string logprobs { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string finish_reason { get; set; }
+    }
 
-        public class Usage
-        {
-            /// <summary>
-            /// 
-            /// </summary>
-            public int prompt_tokens { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public int completion_tokens { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public int total_tokens { get; set; }
-        }
+    public class Message
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string role { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string content { get; set; }
+    }
 
-        public class ChatResponse
-        {
-            /// <summary>
-            /// 
-            /// </summary>
-            public string id { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public string @object { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public int created { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public List<ChoicesItem> choices { get; set; }
-            /// <summary>
-            /// 
-            /// </summary>
-            public Usage usage { get; set; }
-        }
+    public class ChoicesItem
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public int index { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Message message { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string finish_reason { get; set; }
+    }
+
+    public class Usage
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public int prompt_tokens { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int completion_tokens { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int total_tokens { get; set; }
+    }
+
+    public class ChatResponse
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string id { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string @object { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int created { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<ChoicesItem> choices { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Usage usage { get; set; }
     }
 }

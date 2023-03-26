@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
-    <script src="https://hm.baidu.com/hm.js?c995e6552ece61f85c239b001a16d2d8"></script>
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" media="all">
     <link rel="stylesheet" type="text/css" href="/layui/css/modules/code.css" media="all">
@@ -18,59 +17,83 @@
 </head>
 
 <body>
-    <div class="layui-layout">
-        <div class="layui-body" style="left: 0%;">
-            <div class="layui-col-md3 layui-col-xs12 ">
-                <img src="https://base-1251268098.cos.ap-chengdu.myqcloud.com/20230304232010.png" class="layui-circle"
-                    height="25%" width="25%" style="margin-left: 37.25%;">
-                <div style="margin-top: 15px; margin-left: 45%;" id="__name">
-                    <i> 刺、青</i>
-                </div>
-                <hr class="layui-border-orange" width="30%" style="margin-top: 5px; margin-left: 35%;">
-                <div style="margin-top: 10px; margin-left: 35%;" id="__git">
-                    <a href="https://github.com/zy-game/">
-                        <img src="https://github.githubassets.com/apple-touch-icon-144x144.png" class="layui-circle"
-                            height="10%" width="10%" style="margin-top: 5px; margin-left: 18%;">
-                    </a>
-                </div>
+    <div class="layui-row">
+        <div class="layui-col-md3" style="top: 100px;height:300px">
+            <div id="icon" style="height: 160px;">
+                <img src="20230304232010.png" class="layui-circle"
+                    style="position:relative;width: 150px;height:150px;left:50%;transform:translateX(-50%)">
+
             </div>
-            <div class="layui-col-md9 layui-col-xs12">
-                <div class="layui-tab layui-tab-brief " lay-filter="__tab" style="position:absolute; right: 50px;">
-                    <ul class="layui-tab-title">
-                        <li class="layui-this">HOME</li>
-                        <li>UNITY</li>
-                        <li>C#</li>
-                        <li>CHAT-GPT</li>
-                        <li>OHTER</li>
+            <div class="layui-col-md12">
+                <i class="layui-col-md-offset4 layui-col-xs-offset5" id="name"></i>
+                <hr class="layui-border-cyan">
+            </div>
+            <div class="layui-col-md-offset4 layui-col-xs-offset5" id="link">
+                <a href="">
+                    <img src="th.png" class="layui-circle" style="position:relative;width: 30px;height:30px">
+                </a>
+                <a href="tencent://message/?uin=1584948787&Site=&Menu=yes" target="_blank">
+                    <img src="th2.jpg" class="layui-circle" style="position:relative;width: 30px;height:30px">
+                </a>
+            </div>
+        </div>
+        <div class="layui-col-md9 layui-col-xs12" style="top: 30px;">
+            <div class="layui-nav layui-layout-right layui-col-md4 layui-col-xs12" id="meun" lay-filter="demo">
+                <div id="meun">
+                    <li class="layui-nav-item layui-this layui-col-md3 layui-col-xs3" style="text-align: center;">
+                        <a href="javascript:;">Home</a>
+                    </li>
+                    <li class="layui-nav-item layui-col-md3 layui-col-xs2" style="text-align: center;">
+                        <a href="javascript:;" style="text-align: center;">Unity</a>
+                    </li>
+                    <li class="layui-nav-item layui-col-md2 layui-col-xs3" style="text-align: center;">
+                        <a href="javascript:;" onclick="">C#</a>
+                    </li>
+                    <li class="layui-nav-item layui-col-md3 layui-col-xs4" style="text-align: center;">
+                        <a href="javascript:;" onclick="">ChatGPT</a>
+                    </li>
+                </div>
+                <div class="layui-col-md12 layui-col-xs12" id="search">
+                    <ul class="layui-col-md9 layui-col-xs9">
+                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                            class="layui-input" id="tex_search">
                     </ul>
+                    <button type="button"
+                        class="layui-btn layui-btn-primary layui-btn-radius layui-col-md3 layui-col-xs3"
+                        id="btn_search">Search</button>
                 </div>
-                <div class="layui-row " style="position: absolute; top:60px;width:100%">
-                    <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="search info"
-                        class="layui-input " id="search_text" style="position:absolute; right: 140px;width: 200px;">
-                    <button type="button" class="layui-btn layui-btn-primary layui-btn-radius" id="btn_search"
-                        style="position:absolute; right: 50px;">Search</button>
-
-                </div>
-
-            </div>
-            <div class="layui-timeline layui-col-md9 layui-col-xs12" id="list" style="top: 120px;">
-
             </div>
 
+            <div class="layui-col-md9 layui-col-xs11" style="top: 120px; left:20px">
+                <span class="layui-breadcrumb" id="chat_head">
+                    <a href="javascript:;" onclick="" id="chat_home">Chats</a>
+                    <a><cite>导航元素</cite></a>
+                </span>
+                <ul class="layui-timeline" id="list">
+
+                </ul>
+
+            </div>
+
+            <div class="layui-col-md5 layui-col-xs12" style="bottom: 0px;position:fixed;background:rgb(255, 255, 255)"
+                id="chat_input">
+
+                <ul class="layui-col-md10 layui-col-xs10">
+                    <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        class="layui-input" id="chat_gpt_input">
+                </ul>
+
+                <button type="button" class="layui-btn layui-btn-normal layui-btn-radius layui-col-md2 layui-col-xs2"
+                    id="btn_gpt">Chat</button>
+                <div class="layui-col-md5 layui-col-xs12" style="text-align: center;">
+                    <a href="https://beian.miit.gov.cn/" target="_blank">粤B2-20****59-1</a>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="chat" class="layui-footer layui-row"
-        style="position: fixed; bottom: 10px;background-color:#e2e2e2; width:100%;height:50px; display:none">
-        <div class="layui-input-block">
-            <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入提示语"
-                class="layui-input" style="position: fixed;max-width:80%;bottom: 15px;right: 75px;" id="chat_gpt_input">
-        </div>
-        <button id="btn_chat_gpt" type="button" class="layui-btn layui-btn-normal layui-btn-radius"
-            style="position: fixed;right: 1dvw;bottom: 15px;">确认</button>
-    </div>
+
 </body>
 <script src="/layui/layui.js" charset="utf-8"></script>
-<script src="/help.js"></script>
 <script src="/index.js"></script>
 
 </html>

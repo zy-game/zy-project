@@ -1019,8 +1019,7 @@ a cite {
 
 .layui-layout-admin .layui-footer {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 50%;
     bottom: 0;
     z-index: 990;
     height: 50px;
@@ -4350,8 +4349,8 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav {
     position: relative;
     padding: 0 20px;
-    background-color: #393d49;
-    color: #fff;
+    background-color: #393d4900;
+    color: #000000;
     border-radius: 2px;
     font-size: 0;
     box-sizing: border-box
@@ -4373,8 +4372,8 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav .layui-nav-item a {
     display: block;
     padding: 0 20px;
-    color: #fff;
-    color: rgba(255, 255, 255, .7);
+    color: #000000;
+    color: rgba(0, 0, 0, 0.7);
     transition: all .3s;
     -webkit-transition: all .3s
 }
@@ -4403,7 +4402,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-nav .layui-nav-item a:hover,
 .layui-nav .layui-this a {
-    color: #fff
+    color: #000000
 }
 
 .layui-nav .layui-this:after {
@@ -4829,7 +4828,7 @@ body .layui-table-tips .layui-layer-content {
     position: absolute;
     left: -5px;
     top: 0;
-    z-index: 10;
+    z-index: 0;
     width: 20px;
     height: 20px;
     line-height: 20px;
