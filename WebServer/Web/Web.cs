@@ -3,20 +3,13 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
+using WebServer.DB;
 
-namespace WebServer
+namespace WebServer.Web
 {
     [Route("api/web")]
-    public class Web : ControllerBase
+    public class WebService : ControllerBase
     {
-        class Book
-        {
-            public string id;
-            public string title;
-            public string tag;
-            public string info;
-        }
-
         [HttpGet("search/{msg}")]
         public string Search(string msg)
         {
@@ -26,12 +19,13 @@ namespace WebServer
         [HttpGet("{type}")]
         public string Get(string type)
         {
+            Console.WriteLine(Response.HttpContext.Connection.RemoteIpAddress.ToString() + " => " + type);
             string result = string.Empty;
             List<Book> books = new List<Book>();
             switch (type)
             {
                 case "none":
-                    books = Mongo.Where<Book>(Builders<Book>.Filter.Empty);
+                    books = Mongo.Where(Builders<Book>.Filter.Empty);
                     foreach (Book book in books)
                     {
                         result += "<li class=\"layui-timeline-item\">";
@@ -40,7 +34,7 @@ namespace WebServer
                         result += $"<a id=\" {book.id} href = \"javascript:;\" ¦Ïnclick = \"onInfo({book.id})\">";
                         result += $"<h3 class=\"layui-timeline-title\">{book.title}</h3>";
                         result += "</a>";
-                        result += $"<p>{book.info[..200]}</p>";
+                        result += $"<p>{(book.info.Length > 200 ? book.info[..200] : book.info)}</p>";
                         result += "<ul>";
                         result += "</ul>";
                         result += "</div>";
@@ -48,7 +42,7 @@ namespace WebServer
                     }
                     break;
                 case "unity":
-                    books = Mongo.Where<Book>(Builders<Book>.Filter.Eq("tag", "unity"));
+                    books = Mongo.Where(Builders<Book>.Filter.Eq("tag", "unity"));
                     foreach (Book book in books)
                     {
                         result += "<li class=\"layui-timeline-item\">";
@@ -57,7 +51,7 @@ namespace WebServer
                         result += $"<a id=\" {book.id} href = \"javascript:;\" ¦Ïnclick = \"onInfo({book.id})\">";
                         result += $"<h3 class=\"layui-timeline-title\">{book.title}</h3>";
                         result += "</a>";
-                        result += $"<p>{book.info[..200]}</p>";
+                        result += $"<p>{(book.info.Length > 200 ? book.info[..200] : book.info)}</p>";
                         result += "<ul>";
                         result += "</ul>";
                         result += "</div>";
@@ -65,7 +59,7 @@ namespace WebServer
                     }
                     break;
                 case "c#":
-                    books = Mongo.Where<Book>(Builders<Book>.Filter.Eq("tag", "c#"));
+                    books = Mongo.Where(Builders<Book>.Filter.Eq("tag", "c#"));
                     foreach (Book book in books)
                     {
                         result += "<li class=\"layui-timeline-item\">";
@@ -74,7 +68,7 @@ namespace WebServer
                         result += $"<a id=\" {book.id} href = \"javascript:;\" ¦Ïnclick = \"onInfo({book.id})\">";
                         result += $"<h3 class=\"layui-timeline-title\">{book.title}</h3>";
                         result += "</a>";
-                        result += $"<p>{book.info[..200]}</p>";
+                        result += $"<p>{(book.info.Length > 200 ? book.info[..200] : book.info)}</p>";
                         result += "<ul>";
                         result += "</ul>";
                         result += "</div>";
@@ -91,7 +85,6 @@ namespace WebServer
             try
             {
                 Book book = JsonConvert.DeserializeObject<Book>(data);
-                Mongo.UpsertDocument<Book>(Builders<Book>.Filter.Empty, book);
             }
             catch (Exception e)
             {

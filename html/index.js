@@ -6,7 +6,7 @@ layui.use(['element', 'dropdown', 'util', 'layer', 'table'], function () {
         switchView(elem.text())
     });
     window.$(document).on('click', "#btn_search", onSearchText);
-    window.$(document).on('click', "#btn_gpt", OnGetChatGPTData);
+    window.$(document).on('click', "#btn_gpt", OnSendChat);
     window.$(document).on('click', "#chat_home", showChatList);
     window.onload = function () {
         switchView("Home")
@@ -25,10 +25,9 @@ function active(state) {
 }
 function request(apiName, func) {
     window.$.ajax({
-        // headers: {
-        //     "Access-Control-Allow-Origin": "*",
-        //     "Access-Control-Allow-Methods": "PUT,POST,GET,DELETE,OPTIONS"
-        // },
+        headers: {
+            session: window.session
+        },
         contentType: "application/json",
         type: "GET",
         url: "http://localhost:5130/api/" + apiName,
@@ -37,6 +36,7 @@ function request(apiName, func) {
         }
     })
 }
+
 function switchView(tag) {
     switch (tag) {
         case "Home":
@@ -59,9 +59,7 @@ function switchView(tag) {
             break
         case "ChatGPT":
             active("none")
-            request("chat-gpt/list", function (result) {
-                window.sessionList = JSON.parse(result)
-            })
+            showChatList();
             break
     }
 }
@@ -74,37 +72,35 @@ function onSearchText() {
     document.getElementById("tex_search").value = ""
     request("web/search/" + input, function (args) {
         document.getElementById("list").innerHTML = args
+
     })
 }
 
 function showChatList() {
-    window.$.ajax({
-        headers: {
-            "session": window.session
-        },
-        contentType: "application/json",
-        type: "GET",
-        url: "http://localhost:5130/api/chat-gpt/list",
-        success: function (data) {
-            let list = document.getElementById("list")
-            list.innerHTML = data
-            for (i = 0; i < list.childElementCount; i++) {
-                list.childNodes[i].click = function (obj) {
-                    request("web/" + obj.id, function (args) {
-                    })
-                }
+    window.session = null
+    document.getElementById("chat_session").style.display = "none"
+    request("chat-gpt/list", function (args) {
+        let list = document.getElementById("list")
+        list.innerHTML = args
+        for (i = 0; i < list.childElementCount; i++) {
+            let id = list.childNodes[i].id
+            list.childNodes[i].onclick = function (obj) {
+                window.session = id
+                request("chat-gpt/session/" + id, function (data) {
+                    list.innerHTML = data
+                })
             }
         }
     })
 }
 
-function OnGetChatGPTData() {
+function OnSendChat() {
     let input = document.getElementById("chat_gpt_input").value
     if (String(input).length <= 0) {
         return
     }
     document.getElementById("chat_gpt_input").value = ''
-    request("chat-gpt/code/" + input, function (args) {
+    request("chat-gpt/" + input, function (args) {
         document.getElementById("list").innerHTML = args
     })
 }
