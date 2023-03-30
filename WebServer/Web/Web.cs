@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -15,76 +16,54 @@ namespace WebServer.Web
         {
             return string.Empty;
         }
+        [HttpGet("info/{id}")]
+        public string GetBookData(string id)
+        {
+            FilterDefinition<DBBook> filter = Builders<DBBook>.Filter.Eq("_id", id);
+            var data = Mongo<DBBook>.instance.Where(filter).FirstOrDefault();
+            if (data == null)
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotFound;
+                return string.Empty;
+            }
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(new { data.id, data.title, text = data.info });
+        }
 
         [HttpGet("{type}")]
         public string Get(string type)
         {
-            Console.WriteLine(Response.HttpContext.Connection.RemoteIpAddress.ToString() + " => " + type);
-            string result = string.Empty;
-            List<Book> books = new List<Book>();
+            List<object> result = new List<object>();
+            FilterDefinition<DBBook> filter = Builders<DBBook>.Filter.Empty;
             switch (type)
             {
-                case "none":
-                    books = Mongo.Where(Builders<Book>.Filter.Empty);
-                    foreach (Book book in books)
-                    {
-                        result += "<li class=\"layui-timeline-item\">";
-                        result += "<i class=\"layui-icon layui-timeline-axis\">¤š</i>";
-                        result += "<div class=\"layui-timeline-content layui-text\">";
-                        result += $"<a id=\" {book.id} href = \"javascript:;\" ¦Ïnclick = \"onInfo({book.id})\">";
-                        result += $"<h3 class=\"layui-timeline-title\">{book.title}</h3>";
-                        result += "</a>";
-                        result += $"<p>{(book.info.Length > 200 ? book.info[..200] : book.info)}</p>";
-                        result += "<ul>";
-                        result += "</ul>";
-                        result += "</div>";
-                        result += "</li>";
-                    }
-                    break;
                 case "unity":
-                    books = Mongo.Where(Builders<Book>.Filter.Eq("tag", "unity"));
-                    foreach (Book book in books)
-                    {
-                        result += "<li class=\"layui-timeline-item\">";
-                        result += "<i class=\"layui-icon layui-timeline-axis\">¤š</i>";
-                        result += "<div class=\"layui-timeline-content layui-text\">";
-                        result += $"<a id=\" {book.id} href = \"javascript:;\" ¦Ïnclick = \"onInfo({book.id})\">";
-                        result += $"<h3 class=\"layui-timeline-title\">{book.title}</h3>";
-                        result += "</a>";
-                        result += $"<p>{(book.info.Length > 200 ? book.info[..200] : book.info)}</p>";
-                        result += "<ul>";
-                        result += "</ul>";
-                        result += "</div>";
-                        result += "</li>";
-                    }
+                    filter = Builders<DBBook>.Filter.Eq("tag", "unity");
+
                     break;
-                case "c#":
-                    books = Mongo.Where(Builders<Book>.Filter.Eq("tag", "c#"));
-                    foreach (Book book in books)
-                    {
-                        result += "<li class=\"layui-timeline-item\">";
-                        result += "<i class=\"layui-icon layui-timeline-axis\">¤š</i>";
-                        result += "<div class=\"layui-timeline-content layui-text\">";
-                        result += $"<a id=\" {book.id} href = \"javascript:;\" ¦Ïnclick = \"onInfo({book.id})\">";
-                        result += $"<h3 class=\"layui-timeline-title\">{book.title}</h3>";
-                        result += "</a>";
-                        result += $"<p>{(book.info.Length > 200 ? book.info[..200] : book.info)}</p>";
-                        result += "<ul>";
-                        result += "</ul>";
-                        result += "</div>";
-                        result += "</li>";
-                    }
+                case "csharp":
+                    filter = Builders<DBBook>.Filter.Eq("tag", "csharp");
                     break;
             }
-            return result;
+            var books = Mongo<DBBook>.instance.Where(filter);
+            foreach (DBBook book in books)
+            {
+                result.Add(new
+                {
+                    uid = book.id,
+                    book.title,
+                    info = book.info.Length > 200 ? book.info[..200] : book.info
+                });
+            }
+            return Newtonsoft.Json.JsonConvert.SerializeObject(result);
         }
 
         [HttpPost]
-        public string Post(string data)
+        public string Post([FromBody] string data)
         {
             try
             {
-                Book book = JsonConvert.DeserializeObject<Book>(data);
+                DBBook book = JsonConvert.DeserializeObject<DBBook>(data);
             }
             catch (Exception e)
             {

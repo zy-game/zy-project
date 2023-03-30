@@ -12,15 +12,34 @@
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" media="all">
-    <link rel="stylesheet" type="text/css" href="/layui/css/modules/code.css" media="all">
     <script src="https://cdn.bootcdn.net/ajax/libs/marked/2.0.3/marked.js"></script>
+
+    <link rel="stylesheet" href="/highlight/styles/github-dark-dimmed.min.css">
+    <script src="/highlight/highlight.min.js"></script>
+    <script>
+        var rendererMD = new marked.Renderer()
+        marked.setOptions({
+            renderer: rendererMD,
+            gfm: true,
+            tables: true,
+            breaks: false,
+            pedantic: false,
+            sanitize: false,
+            smartLists: true,
+            smartypants: false,
+            xhtml: false,
+            highlight: function (code) {
+                return hljs.highlightAuto(code).value;
+            }
+        });
+    </script>
 </head>
 
 <body>
     <div class="layui-row">
         <div class="layui-col-md3" style="top: 100px;height:300px">
             <div id="icon" style="height: 160px;">
-                <img src="20230304232010.png" class="layui-circle"
+                <img src="icon.png" class="layui-circle"
                     style="position:relative;width: 150px;height:150px;left:50%;transform:translateX(-50%)">
 
             </div>
@@ -40,22 +59,22 @@
         <div class="layui-col-md9 layui-col-xs12" style="top: 30px;">
             <div class="layui-nav layui-layout-right layui-col-md4 layui-col-xs12" id="meun" lay-filter="demo">
                 <div id="meun">
-                    <li class="layui-nav-item layui-this layui-col-md3 layui-col-xs3" style="text-align: center;">
+                    <li class="layui-nav-item layui-this layui-col-md3 layui-col-xs3">
                         <a href="javascript:;">Home</a>
                     </li>
-                    <li class="layui-nav-item layui-col-md3 layui-col-xs2" style="text-align: center;">
+                    <li class="layui-nav-item layui-col-md3 layui-col-xs2">
                         <a href="javascript:;" style="text-align: center;">Unity</a>
                     </li>
-                    <li class="layui-nav-item layui-col-md2 layui-col-xs3" style="text-align: center;">
+                    <li class="layui-nav-item layui-col-md2 layui-col-xs3">
                         <a href="javascript:;" onclick="">C#</a>
                     </li>
-                    <li class="layui-nav-item layui-col-md3 layui-col-xs4" style="text-align: center;">
+                    <li class="layui-nav-item layui-col-md3 layui-col-xs4">
                         <a href="javascript:;" onclick="">ChatGPT</a>
                     </li>
                 </div>
                 <div class="layui-col-md12 layui-col-xs12" id="search">
                     <ul class="layui-col-md9 layui-col-xs9">
-                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder=""
                             class="layui-input" id="tex_search">
                     </ul>
                     <button type="button"
@@ -64,31 +83,29 @@
                 </div>
             </div>
 
-            <div class="layui-col-md9 layui-col-xs11" style="top: 120px; left:20px">
+            <div class="layui-col-md9 layui-col-xs11" style="top: 80px; left:20px">
                 <span class="layui-breadcrumb" id="chat_head">
                     <a href="javascript:;" onclick="" id="chat_home">Chats</a>
-                    <a id="chat_session"><cite>导航元素</cite></a>
+                    <a id="chat_session"></a>
                 </span>
-                <ul class="layui-timeline" id="list">
 
+                <ul class="layui-timeline" id="list" style="margin-top: 20px;">
                 </ul>
+                <div class="layui-col-md12 layui-col-xs12 " id="chat_input" style="height: 100px;left: -10px;">
 
-            </div>
+                    <ul class="layui-col-md10 layui-col-xs9">
+                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder=""
+                            class="layui-input" id="chat_gpt_input">
+                    </ul>
 
-            <div class="layui-col-md5 layui-col-xs12" style="bottom: 0px;position:fixed;background:rgb(255, 255, 255)"
-                id="chat_input">
+                    <button type="button"
+                        class="layui-btn layui-btn-normal layui-btn-radius layui-col-md1 layui-col-xs3"
+                        id="btn_gpt">Chat</button>
 
-                <ul class="layui-col-md10 layui-col-xs10">
-                    <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题"
-                        class="layui-input" id="chat_gpt_input">
-                </ul>
-
-                <button type="button" class="layui-btn layui-btn-normal layui-btn-radius layui-col-md2 layui-col-xs2"
-                    id="btn_gpt">Chat</button>
-                <div class="layui-col-md5 layui-col-xs12" style="text-align: center;">
-                    <a href="https://beian.miit.gov.cn/" target="_blank">粤B2-20****59-1</a>
                 </div>
             </div>
+
+
         </div>
     </div>
 

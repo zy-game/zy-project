@@ -1,47 +1,29 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using WebServer.ChatGPT;
 
 namespace WebServer.DB
 {
-    public class ChatSession
+    public class Mongo<T>
     {
-        [BsonId]
-        public ObjectId _id { get; set; }
-        [BsonElement("title")]
-        public string title { get; set; }
-        [BsonElement("chats")]
-        public string chats { get; set; }
-    }
-    [BsonIgnoreExtraElements]
-    class Book
-    {
-        public string id;
-        public string title;
-        public string tag;
-        public string info;
-    }
-    public class Mongo
-    {
-
-        private static MongoClient _client;
-        private static IMongoDatabase _database;
-
-        public static void EnsureMongoContent()
+        private static Lazy<Mongo<T>> _instance = new Lazy<Mongo<T>>(() => new Mongo<T>());
+        public static Mongo<T> instance
         {
-            if (_client != null)
+            get
             {
-                return;
+                return _instance.Value;
             }
-            string connStr = "mongodb://140.143.97.63:27017";
-            _client = new MongoClient(connStr);
+        }
+        private MongoClient _client;
+        private IMongoDatabase _database;
+
+        public Mongo()
+        {
+            _client = new MongoClient("mongodb://140.143.97.63:27017");
             _database = _client.GetDatabase("x-project");
         }
         // 增加数据并验证是否存在
-        public static void Add<T>(T value)
+        public void Add(T value)
         {
-            EnsureMongoContent();
             lock (_client)
             {
 
@@ -50,9 +32,8 @@ namespace WebServer.DB
             }
 
         }
-        public static List<T> Where<T>(FilterDefinition<T> definition)
+        public List<T> Where(FilterDefinition<T> definition)
         {
-            EnsureMongoContent();
             lock (_client)
             {
                 try
@@ -65,14 +46,13 @@ namespace WebServer.DB
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    return default;
+                    return new List<T>();
                 }
             }
         }
 
-        public static void Update<T>(FilterDefinition<T> definition, UpdateDefinition<T> update)
+        public void Update(FilterDefinition<T> definition, UpdateDefinition<T> update)
         {
-            EnsureMongoContent();
             lock (_client)
             {
                 try
@@ -89,9 +69,8 @@ namespace WebServer.DB
         }
 
 
-        public static void Delete<T>(FilterDefinition<T> definition)
+        public void Delete(FilterDefinition<T> definition)
         {
-            EnsureMongoContent();
             lock (_client)
             {
 
@@ -99,9 +78,8 @@ namespace WebServer.DB
                 collection.DeleteOne(definition);
             }
         }
-        public static long Count<T>()
+        public long Count()
         {
-            EnsureMongoContent();
             lock (_client)
             {
 
