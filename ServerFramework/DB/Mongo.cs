@@ -1,18 +1,10 @@
 using MongoDB.Driver;
-using WebServer.ChatGPT;
 
-namespace WebServer.DB
+namespace ServerFramework.DB
 {
-    public class Mongo<T>
+    public class Mongo : Singleton<Mongo>
     {
-        private static Lazy<Mongo<T>> _instance = new Lazy<Mongo<T>>(() => new Mongo<T>());
-        public static Mongo<T> instance
-        {
-            get
-            {
-                return _instance.Value;
-            }
-        }
+
         private MongoClient _client;
         private IMongoDatabase _database;
 
@@ -22,7 +14,7 @@ namespace WebServer.DB
             _database = _client.GetDatabase("x-project");
         }
         // 增加数据并验证是否存在
-        public void Add(T value)
+        public T Add<T>(T value)
         {
             lock (_client)
             {
@@ -30,9 +22,9 @@ namespace WebServer.DB
                 IMongoCollection<T> collection = _database.GetCollection<T>(typeof(T).Name);
                 collection.InsertOne(value);
             }
-
+            return value;
         }
-        public List<T> Where(FilterDefinition<T> definition)
+        public List<T> Where<T>(FilterDefinition<T> definition)
         {
             lock (_client)
             {
@@ -51,7 +43,7 @@ namespace WebServer.DB
             }
         }
 
-        public void Update(FilterDefinition<T> definition, UpdateDefinition<T> update)
+        public void Update<T>(FilterDefinition<T> definition, UpdateDefinition<T> update)
         {
             lock (_client)
             {
@@ -69,7 +61,7 @@ namespace WebServer.DB
         }
 
 
-        public void Delete(FilterDefinition<T> definition)
+        public void Delete<T>(FilterDefinition<T> definition)
         {
             lock (_client)
             {
@@ -78,7 +70,7 @@ namespace WebServer.DB
                 collection.DeleteOne(definition);
             }
         }
-        public long Count()
+        public long Count<T>()
         {
             lock (_client)
             {

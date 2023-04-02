@@ -26,7 +26,7 @@ namespace WebServer.ChatGPT
                 chat_session = ChatChannel.AddSession(msg);
             }
             Stopwatch stopwatch = Stopwatch.StartNew();
-            await chat_session.Question(msg);
+            string response = await chat_session.Question(msg);
             List<object> result = new List<object>();
             for (var i = 0; i < chat_session.chats.Count; i++)
             {
@@ -37,7 +37,7 @@ namespace WebServer.ChatGPT
                 });
             }
             stopwatch.Stop();
-            Console.WriteLine($"id:{chat_session.id}title:{chat_session.title} question:{msg} use time:{(stopwatch.ElapsedMilliseconds / 1000f)}");
+            Console.WriteLine($"id:{chat_session.id}title:{chat_session.title} question:{msg} response:{response} use time:{(stopwatch.ElapsedMilliseconds / 1000f)}");
             return JsonConvert.SerializeObject(new { uid = chat_session.id, title = chat_session.title, chats = result });
         }
 

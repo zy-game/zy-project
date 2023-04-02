@@ -2,8 +2,8 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using System.Net.Http.Headers;
-using System.Text;
+using Newtonsoft.Json.Linq;
+using ServerFramework;
 using WebServer.DB;
 
 namespace WebServer.Web
@@ -14,13 +14,31 @@ namespace WebServer.Web
         [HttpGet("search/{msg}")]
         public string Search(string msg)
         {
-            return string.Empty;
+            FilterDefinition<DBBook> filter = Builders<DBBook>.Filter.Empty;
+            var books = Server.DBService.Where(filter);
+            List<object> result = new List<object>();
+            foreach (DBBook book in books)
+            {
+                if (book.info.Contains(msg) || book.title.Contains(msg))
+                {
+                    result.Add(new
+                    {
+                        uid = book.id,
+                        book.title,
+                        info = book.info.Length > 200 ? book.info[..200] : book.info
+                    });
+                }
+            }
+            return JsonConvert.SerializeObject(result);
         }
+
+
+
         [HttpGet("info/{id}")]
         public string GetBookData(string id)
         {
             FilterDefinition<DBBook> filter = Builders<DBBook>.Filter.Eq("_id", id);
-            var data = Mongo<DBBook>.instance.Where(filter).FirstOrDefault();
+            var data = Server.DBService.Where(filter).FirstOrDefault();
             if (data == null)
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -45,7 +63,7 @@ namespace WebServer.Web
                     filter = Builders<DBBook>.Filter.Eq("tag", "csharp");
                     break;
             }
-            var books = Mongo<DBBook>.instance.Where(filter);
+            var books = Server.DBService.Where(filter);
             foreach (DBBook book in books)
             {
                 result.Add(new
@@ -55,21 +73,61 @@ namespace WebServer.Web
                     info = book.info.Length > 200 ? book.info[..200] : book.info
                 });
             }
-            return Newtonsoft.Json.JsonConvert.SerializeObject(result);
+            return JsonConvert.SerializeObject(result);
         }
 
         [HttpPost]
-        public string Post([FromBody] string data)
+        public async Task<string> Post([FromForm] string model)
         {
+            string data = await new StreamReader(Request.Body).ReadToEndAsync();
+            Console.WriteLine(data);
+            List<object> chats = new List<object>();
             try
             {
-                DBBook book = JsonConvert.DeserializeObject<DBBook>(data);
+                JObject request = JObject.Parse(data);
+                string value = request["value"].ToString();
+                value = string.IsNullOrEmpty(value) == false && value.Length > 200 ? value[..200] : value;
+                Server.DBService.Insert(new DBCommand() { title = request["message"].ToString(), text = value, time = DateTime.Now.ToString("G") });
+                List<DBCommand> commands = Server.DBService.Where(Builders<DBCommand>.Filter.Where((x) => true));
+                for (int i = commands.Count > 10 ? commands.Count - 10 : 0; i < commands.Count; i++)
+                {
+                    var item = commands[i];
+                    chats.Add(new
+                    {
+                        role = item.title,
+                        content = item.text + "\n\n Executed By " + item.time
+                    });
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine(Request.Host + ":" + e.Message);
+                Console.WriteLine(Request.Host + ":" + e);
             }
-            return "OK";
+            return JsonConvert.SerializeObject(chats);
+        }
+
+        [HttpGet("cmds")]
+        public string GetCommandList()
+        {
+            List<object> chats = new List<object>();
+            try
+            {
+                List<DBCommand> commands = Server.DBService.Where(Builders<DBCommand>.Filter.Where((x) => true));
+                for (int i = commands.Count > 10 ? commands.Count - 10 : 0; i < commands.Count; i++)
+                {
+                    var item = commands[i];
+                    chats.Add(new
+                    {
+                        role = item.title,
+                        content = item.text + "\n\n Executed By " + item.time
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(Request.Host + ":" + e);
+            }
+            return JsonConvert.SerializeObject(chats);
         }
     }
 }

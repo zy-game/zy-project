@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using Newtonsoft.Json;
+using ServerFramework;
 using System.Net.Http.Headers;
 using System.Text;
 using WebServer.DB;
@@ -22,7 +23,7 @@ namespace WebServer.ChatGPT
                 return;
             }
             __sessions = new List<ChatChannel>();
-            List<DBSession> sessions = Mongo<DBSession>.instance.Where(Builders<DBSession>.Filter.Where(_ => true));
+            List<DBSession> sessions = Server.DBService.Where(Builders<DBSession>.Filter.Where(_ => true));
             if (sessions == null)
             {
                 return;
@@ -42,11 +43,11 @@ namespace WebServer.ChatGPT
                 ChatChannel channel = __sessions.FirstOrDefault();
                 if (channel != null)
                 {
-                    Mongo<DBSession>.instance.Delete(Builders<DBSession>.Filter.Eq("_id", channel.id));
+                    Server.DBService.Delete(Builders<DBSession>.Filter.Eq("_id", channel.id));
                     __sessions.Remove(channel);
                 }
             }
-            Mongo<DBSession>.instance.Add(datable);
+            Server.DBService.Insert(datable);
             ChatChannel session = new ChatChannel() { id = datable._id.ToString(), title = datable.title, chats = new List<Role>() };
             __sessions.Add(session);
             return session;
@@ -74,7 +75,7 @@ namespace WebServer.ChatGPT
         public string title { get; private set; }
         public List<Role> chats { get; private set; }
         private HttpClient client = new HttpClient();
-        private string apiKey = "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";
+        private string apiKey = "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";
 
         public async Task<string> Question(string text)
         {
@@ -135,7 +136,7 @@ namespace WebServer.ChatGPT
             }
             var findFilter = Builders<DBSession>.Filter.Eq("title", title);
             var updateFilter = Builders<DBSession>.Update.Set("chats", JsonConvert.SerializeObject(roles));
-            Mongo<DBSession>.instance.Update(findFilter, updateFilter);
+            Server.DBService.Update(findFilter, updateFilter);
             return result;
         }
         public async Task<string> GetCodeCompletion(string msg)

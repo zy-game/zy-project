@@ -1,6 +1,7 @@
+let pageName = "Home"
 layui.use(['element', 'dropdown', 'util', 'layer', 'table'], function () {
     var dropdown = layui.dropdown, util = layui.util, layer = layui.layer, table = layui.table
-    $ = layui.jquery, element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+    $ = layui.jquery, element = layui.element, layedit = layui.layedit; //Tab的切换功能，切换事件监听等，需要依赖element模块
     //监听导航点击
     element.on('nav(demo)', function (elem) {
         switchView(elem.text())
@@ -11,18 +12,24 @@ layui.use(['element', 'dropdown', 'util', 'layer', 'table'], function () {
     window.onload = function () {
         switchView("Home")
     }
+    var index = layedit.build('edit');
 })
 function active(state) {
     if (state == "none") {
         document.getElementById("chat_head").style.display = "block"
         document.getElementById("chat_input").style.display = "block"
         document.getElementById("search").style.display = "none"
+        document.getElementById("chat_head").style.display = "block"
+        document.getElementById("editor").style.display = "none"
     } else {
         document.getElementById("chat_input").style.display = "none"
         document.getElementById("chat_head").style.display = "none"
+        document.getElementById("chat_head").style.display = "none"
         document.getElementById("search").style.display = "block"
+        document.getElementById("editor").style.display = "none"
     }
 }
+let remote_url = "http://localhost:5130/api/"
 function request(apiName, func) {
     window.$.ajax({
         headers: {
@@ -30,25 +37,38 @@ function request(apiName, func) {
         },
         contentType: "application/json",
         type: "GET",
-        url: "http://140.143.97.63:8080/api/" + apiName,
+        url: remote_url + apiName,
+        dataType: 'json',
+        success: function (data) {
+            func(data)
+        }
+    })
+}
+function post(apiName, text, func) {
+    $.ajax({
+        contentType: "application/json",
+        type: "POST",
+        url: remote_url + apiName,
+        data: text,
+        dataType: "json",
         success: function (data) {
             func(data)
         }
     })
 }
 
-function GetTimeLineList(data) {
+function GetTimeLineList(dataList) {
     let result = ''
-    var dataList = JSON.parse(data)
     for (let index = 0; index < dataList.length; index++) {
-
         result += '<li class=\"layui-timeline-item\" id = \"' + dataList[index].uid + '\">'
         result += '<i class=\"layui-icon layui-timeline-axis\"></i>'
         result += '<div class=\"layui-timeline-content layui-text\">'
         result += '<a href = \"javascript:;\" οnclick = \"\">'
         result += '<h3 class=\"layui-timeline-title\">' + dataList[index].title + '</h3>'
         result += '</a>'
-        result += '<p>' + marked.parse(dataList[index].info) + '</p>'
+        if (dataList[index].info != null) {
+            result += '<p>' + marked.parse(dataList[index].info) + '</p>'
+        }
         result += "<ul>"
         result += "</ul>"
         result += "</div>"
@@ -58,24 +78,25 @@ function GetTimeLineList(data) {
 }
 
 function GetChatList(dataList) {
-    let resu = ""
+    let result = ""
     for (let index = 0; index < dataList.length; index++) {
-        resu += '<li class=\"layui-timeline-item\">'
+        result += '<li class=\"layui-timeline-item\">'
         let icon = "chatgpt-icon"
         if (dataList[index].role == "Me") {
             icon = "icon"
         }
-        resu += '<i class=\"layui-icon layui-timeline-axis\"><img src="' + icon + '.png" class="layui-circle" style="position:relative;width: 30px;height:30px;top:-5px;left:-5px"></i>'
-        resu += '<div class=\"layui-timeline-content layui-text\">'
-        resu += '<h3 class=\"layui-timeline-title\">' + dataList[index].role + '</h3>'
-
-        resu += '<p>' + marked.parse(dataList[index].content) + '</p>'
-        resu += '<ul>'
-        resu += '</ul>'
-        resu += '</div>'
-        resu += '</li>'
+        result += '<i class=\"layui-icon layui-timeline-axis\"><img src="' + icon + '.png" class="layui-circle" style="position:relative;width: 30px;height:30px;top:-5px;left:-5px"></i>'
+        result += '<div class=\"layui-timeline-content layui-text\">'
+        result += '<h3 class=\"layui-timeline-title\">' + dataList[index].role + '</h3>'
+        if (dataList[index].content != null) {
+            result += '<p>' + marked.parse(dataList[index].content) + '</p>'
+        }
+        result += '<ul>'
+        result += '</ul>'
+        result += '</div>'
+        result += '</li>'
     }
-    return resu;
+    return result;
 }
 
 function ClearTimeListChilds(name) {
@@ -86,28 +107,51 @@ function ClearTimeListChilds(name) {
 }
 
 function switchView(tag) {
+    pageName = tag
+    document.getElementById("chat_head").style.display = "none"
+    document.getElementById("chat_input").style.display = "none"
+    document.getElementById("search").style.display = "none"
+    document.getElementById("chat_head").style.display = "none"
     switch (tag) {
         case "Home":
-            active("block")
+            ClearTimeListChilds("list")
+            document.getElementById("search").style.display = "block"
             request("web/none", OnGetBookListCompletion)
             break
         case "Unity":
-            active("block")
+            ClearTimeListChilds("list")
+            document.getElementById("search").style.display = "block"
             request("web/unity", OnGetBookListCompletion)
             break
         case "C#":
-            active("block")
+            ClearTimeListChilds("list")
+            document.getElementById("search").style.display = "block"
             request("web/csharp", OnGetBookListCompletion)
             break
         case "ChatGPT":
-            active("none")
+            ClearTimeListChilds("list")
+            document.getElementById("chat_head").style.display = "block"
+            document.getElementById("chat_input").style.display = "block"
+            document.getElementById("chat_head").style.display = "block"
             showChatList();
+            break
+        case "Command":
+            ClearTimeListChilds("list")
+            document.getElementById("chat_input").style.display = "block"
+            OnShowCommand();
             break
     }
 }
 
+function OnShowCommand() {
+    request("web/cmds", function (response) {
+        document.getElementById("list").innerHTML = GetChatList(response)
+        window.scrollTo(0, document.body.scrollHeight);
+        $("#btn_gpt").attr("disabled", false).removeClass("layui-btn-disabled")
+    })
+}
+
 function OnGetBookListCompletion(data) {
-    ClearTimeListChilds("list")
     let list = document.getElementById("list")
     list.innerHTML = GetTimeLineList(data)
     for (i = 0; i < list.childElementCount; i++) {
@@ -137,8 +181,8 @@ function onSearchText() {
 function showChatList() {
     window.session = null
     ClearTimeListChilds("chat_session");
-    let list = document.getElementById("list")
     request("chat-gpt", function (args) {
+        let list = document.getElementById("list")
         ClearTimeListChilds("list");
         list.innerHTML = GetTimeLineList(args)
         for (i = 0; i < list.childElementCount; i++) {
@@ -153,7 +197,6 @@ function showChatList() {
 function OnClickChatItem(id) {
     window.session = id
     request("chat-gpt/session/" + id, function (data) {
-        var data = JSON.parse(data)
         ClearTimeListChilds("list");
         ClearTimeListChilds("chat_session");
         document.getElementById("chat_session").innerHTML = "<cite >" + data.title + "</cite>"
@@ -168,12 +211,19 @@ function OnSendChat() {
     }
     $("#btn_gpt").attr("disabled", true).addClass("layui-btn-disabled")
     document.getElementById("chat_gpt_input").value = ''
-    request("chat-gpt/chat/" + input, function (args) {
+    if (pageName == "Command") {
+        post("web", '{' + '"message":"createbook","value":{"title":"Test","tag":"C#","info":"哈哈"}' + '}', function (args) {
+            ClearTimeListChilds("list");
+            document.getElementById("list").innerHTML = GetChatList(args)
+            window.scrollTo(0, document.body.scrollHeight);
+            $("#btn_gpt").attr("disabled", false).removeClass("layui-btn-disabled")
+        })
+        return
+    }
+    request("chat-gpt/chat/" + input, function (response) {
         ClearTimeListChilds("list");
         ClearTimeListChilds("chat_session");
         $("#btn_gpt").attr("disabled", false).removeClass("layui-btn-disabled")
-        var response = JSON.parse(args)
-        console.log(args)
         window.session = response.uid
         document.getElementById("chat_session").innerHTML = "<cite >" + response.title + "</cite>"
         document.getElementById("list").innerHTML = GetChatList(response.chats)

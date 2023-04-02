@@ -59,17 +59,20 @@
         <div class="layui-col-md9 layui-col-xs12" style="top: 30px;">
             <div class="layui-nav layui-layout-right layui-col-md4 layui-col-xs12" id="meun" lay-filter="demo">
                 <div id="meun">
-                    <li class="layui-nav-item layui-this layui-col-md3 layui-col-xs3">
+                    <li class="layui-nav-item layui-this ">
                         <a href="javascript:;">Home</a>
                     </li>
-                    <li class="layui-nav-item layui-col-md3 layui-col-xs2">
+                    <li class="layui-nav-item">
                         <a href="javascript:;" style="text-align: center;">Unity</a>
                     </li>
-                    <li class="layui-nav-item layui-col-md2 layui-col-xs3">
+                    <li class="layui-nav-item">
                         <a href="javascript:;" onclick="">C#</a>
                     </li>
-                    <li class="layui-nav-item layui-col-md3 layui-col-xs4">
+                    <li class="layui-nav-item">
                         <a href="javascript:;" onclick="">ChatGPT</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;" onclick="">Command</a>
                     </li>
                 </div>
                 <div class="layui-col-md12 layui-col-xs12" id="search">
@@ -83,7 +86,7 @@
                 </div>
             </div>
 
-            <div class="layui-col-md9 layui-col-xs11" style="top: 80px; left:20px">
+            <div class="layui-col-md11 layui-col-xs11" style="top: 80px; left:20px">
                 <span class="layui-breadcrumb" id="chat_head">
                     <a href="javascript:;" onclick="" id="chat_home">Chats</a>
                     <a id="chat_session"></a>
@@ -91,8 +94,8 @@
 
                 <ul class="layui-timeline" id="list" style="margin-top: 20px;">
                 </ul>
-                <div class="layui-col-md12 layui-col-xs12 " id="chat_input" style="height: 100px;left: -10px;">
-
+                <div class="layui-col-md8 layui-col-xs12 " id="chat_input"
+                    style="height: 100px; position:relative;left:50%;transform:translateX(-50%);top:40px">
                     <ul class="layui-col-md10 layui-col-xs9">
                         <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder=""
                             class="layui-input" id="chat_gpt_input">
@@ -104,8 +107,6 @@
 
                 </div>
             </div>
-
-
         </div>
     </div>
 
