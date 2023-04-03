@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using ServerFramework.Actor;
 using ServerFramework.Config;
 using ServerFramework.DB;
 
@@ -25,8 +26,12 @@ namespace ServerFramework
         }
 
         public sealed class Actor
-        { 
-            
+        {
+            public static void RegisterActorChannel<T>(ActorNetType netType, string url) where T : ActorChannel => ActorSystem.instance.Register<T>(netType, url);
+
+            public static void SendSync(IMessage message) => ActorSystem.instance.SendSync(message);
+
+            public static Task<IMessage> SendAsync(IMessage message) => ActorSystem.instance.SendAsync(message);
         }
     }
 }
