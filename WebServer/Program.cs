@@ -1,52 +1,47 @@
-using Microsoft.AspNetCore.Authentication.Negotiate;
-using ServerFramework;
-using WebServer.Web;
+﻿using ZyGame;
+using ZyGame.Actor;
 
-namespace WebServer
+
+Server.Actor.Register<Web>("/web");
+Server.Actor.Register<File>("/file");
+Server.Actor.Register<Cmd>("/cmd");
+Server.Actor.Register<Gateway>("/gate");
+Server.Actor.Startup("Web Server", 8080, false);
+Server.Actor.BroadCast("/web", "222");
+Console.ReadLine();
+Server.Actor.Shutdown();
+class Web : ActorBase
 {
-    class WebSetting
+    public override async Task<object> Recvie(object message)
     {
-        public bool IsDeviloop = false;
-        public string hosting = "http://0.0.0.0:8080";
+        Server.Console.WriteLine(message);
+        object next = await SendAsync(message);
+        Server.Console.WriteLine(next);
+
+        return message;
     }
-    public class Program
+}
+
+class File : ActorBase
+{
+    public override Task<object> Recvie(object message)
     {
-        public static void Main(string[] args)
-        {
-            WebSetting setting = Server.Config.GetOrLoadConfig<WebSetting>();
+        return Task.FromResult(default(object));
+    }
+}
 
-            var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-               .AddNegotiate();
-            builder.WebHost.UseUrls(setting.hosting);
-            builder.Services.AddAuthorization(options =>
-            {
-                // By default, all incoming requests will be authorized according to the default policy.
-                options.FallbackPolicy = options.DefaultPolicy;
-            });
+class Cmd : ActorBase
+{
+    public override Task<object> Recvie(object message)
+    {
+        return Task.FromResult(default(object));
+    }
+}
 
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (setting.IsDeviloop)
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseCors(args =>
-            {
-                args.AllowAnyHeader();
-                args.AllowAnyMethod();
-                args.AllowAnyOrigin();
-            });
-
-            app.UseHttpsRedirection();
-            app.MapControllers();
-            app.Run();
-        }
+class Gateway : ActorBase
+{
+    public override Task<object> Recvie(object message)
+    {
+        return Task.FromResult(default(object));
     }
 }
