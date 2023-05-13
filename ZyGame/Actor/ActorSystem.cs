@@ -12,25 +12,8 @@ using System.Text;
 
 namespace ZyGame.Actor
 {
-    class Route : Singleton<Route>
-    {
-
-
-        public async void SendSync(string url, object message)
-        {
-            //todo 调用远程服务
-        }
-
-        public Task<object> SendAsync(string url, object message)
-        {
-            //todo 调用远程服务
-            return default;
-        }
-    }
-
     internal class ActorSystem : Singleton<ActorSystem>
     {
-        private Route route;
         private IChannel bootstrapChannel;
         private IEventLoopGroup bossGroup;
         private IEventLoopGroup workGroup;
@@ -85,7 +68,12 @@ namespace ZyGame.Actor
 
                 bootstrapChannel = await bootstrap.BindAsync(IPAddress.Loopback, Port);
                 Server.Console.WriteLine("Open your web browser and navigate to " + $"{(IsSsl ? "https" : "http")}" + $"://127.0.0.1:{Port}/");
-                Server.Console.WriteLine("Listening on " + $"{(IsSsl ? "wss" : "ws")}" + $"://127.0.0.1:{Port}/websocket");
+                Server.Console.WriteLine("Listening on " + $"{(IsSsl ? "wss" : "ws")}" + $"://127.0.0.1:{Port}");
+
+                foreach (var item in roots)
+                {
+                    Server.Console.WriteLine($"Opened Service: {item.Key}");
+                }
             }
             catch (Exception ex)
             {
@@ -112,7 +100,7 @@ namespace ZyGame.Actor
             roots[url].BroadCast(Msg);
         }
 
-  
+
 
         /// <summary>
         /// 发送消息
@@ -123,10 +111,10 @@ namespace ZyGame.Actor
         {
             if (roots.TryGetValue(url, out ActorRoot root))
             {
-                //await root.Recvie(message);
+                await root.Recvie(null, message);
                 return;
             }
-            route.SendSync(url, message);
+            //todo 调用远程服务
         }
 
         /// <summary>
@@ -139,9 +127,10 @@ namespace ZyGame.Actor
         {
             if (roots.TryGetValue(url, out ActorRoot root))
             {
-                //return await root.Recvie(message);
+                return await root.Recvie(null, message);
             }
-            return await route.SendAsync(url, message);
+            //todo 调用远程服务
+            return default;
         }
 
         internal async void Shutdown()
@@ -153,6 +142,7 @@ namespace ZyGame.Actor
             await bootstrapChannel.CloseAsync();
             await workGroup.ShutdownGracefullyAsync();
             await bossGroup.ShutdownGracefullyAsync();
+            Server.Console.WriteLine("Server Shutdown");
         }
     }
 }

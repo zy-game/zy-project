@@ -2,6 +2,7 @@
 using ZyGame.Actor;
 using ZyGame.Config;
 using ZyGame.DB;
+using ZyGame.Service;
 
 namespace ZyGame
 {
@@ -52,6 +53,21 @@ namespace ZyGame
             public static Task<object> SendAsync(string url, object message) => ActorSystem.instance.SendAsync(url, message);
 
             public static void Register<T>(string url) where T : ActorBase => ActorSystem.instance.Register<T>(url);
+        }
+
+        public sealed class Service
+        {
+            public static Task Startup<T>() where T : IService => ServiceSystem.instance.Startup<T>();
+
+            public static Task Startup(Type type) => ServiceSystem.instance.Startup(type);
+
+            public static Task Shutdown<T>() where T : IService => ServiceSystem.instance.Shutdown<T>();
+
+            public static Task Shutdown(Type type) => ServiceSystem.instance.Shutdown(type);
+
+            public static T GetService<T>() where T : IService => ServiceSystem.instance.GetService<T>();
+
+            public static IService GetService(Type type) => ServiceSystem.instance.GetService(type);
         }
     }
 }

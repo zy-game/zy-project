@@ -1,12 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-namespace ZyGame.Actor
+namespace ZyGame.Network
 {
-
+    using System.Net;
+    using System.Runtime;
+    using System.Runtime.InteropServices;
+    using System.Security.Cryptography.X509Certificates;
     using DotNetty.Codecs.Http;
-    using DotNetty.Codecs.Http.WebSockets;
+    using DotNetty.Handlers.Tls;
+    using DotNetty.Transport.Bootstrapping;
     using DotNetty.Transport.Channels;
+    using DotNetty.Transport.Channels.Sockets;
+    using DotNetty.Codecs.Http.WebSockets;
     using static DotNetty.Codecs.Http.HttpVersion;
     using static DotNetty.Codecs.Http.HttpResponseStatus;
     using DotNetty.Buffers;
@@ -15,17 +18,89 @@ namespace ZyGame.Actor
     using System.Threading.Tasks;
     using System.Diagnostics;
     using DotNetty.Common.Utilities;
-    using System.Collections.Concurrent;
-
-
-    public sealed class WebHandler : SimpleChannelInboundHandler<object>
+    public class WebSocketServer : IDisposable
     {
-        private ActorRoot root;
-        private static Boolean IsSsl;
-        WebSocketServerHandshaker handshaker;
-        public static void SetSsl(bool isSsl)
+        private IChannel bootstrapChannel;
+        private IEventLoopGroup bossGroup;
+        private IEventLoopGroup workGroup;
+        private ushort Port;
+        private bool isOpenSSL;
+        public Action OnOpened { get; }
+        public Action OnClosed { get; }
+        public Action OnPong { get; }
+        public Action<byte[]> OnMessaged { get; }
+        public WebSocketServer(ushort port, bool isOpenSSL)
         {
-            IsSsl = isSsl;
+            this.Port = port;
+            this.isOpenSSL = isOpenSSL;
+        }
+
+        public async Task Start()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+            }
+            Server.Console.WriteLine($"Server garbage collection : {(GCSettings.IsServerGC ? "Enabled" : "Disabled")}");
+            Server.Console.WriteLine($"Current latency mode for garbage collection: {GCSettings.LatencyMode}");
+            bossGroup = new MultithreadEventLoopGroup(1);
+            workGroup = new MultithreadEventLoopGroup();
+            X509Certificate2 tlsCertificate = null;
+            if (isOpenSSL)
+            {
+                tlsCertificate = new X509Certificate2(Path.Combine(AppContext.BaseDirectory, "dotnetty.com.pfx"), "password");
+            }
+            try
+            {
+                var bootstrap = new ServerBootstrap();
+                bootstrap.Group(bossGroup, workGroup);
+                bootstrap.Channel<TcpServerSocketChannel>();
+                bootstrap
+                    .Option(ChannelOption.SoBacklog, 8192)
+                    .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
+                    {
+                        IChannelPipeline pipeline = channel.Pipeline;
+                        if (tlsCertificate != null)
+                        {
+                            pipeline.AddLast(TlsHandler.Server(tlsCertificate));
+                        }
+                        pipeline.AddLast(new HttpServerCodec());
+                        pipeline.AddLast(new HttpObjectAggregator(65536));
+                        pipeline.AddLast(new WebHandler(this, isOpenSSL));
+                    }));
+
+                bootstrapChannel = await bootstrap.BindAsync(IPAddress.Loopback, Port);
+                Server.Console.WriteLine("Open your web browser and navigate to " + $"{(isOpenSSL ? "https" : "http")}" + $"://127.0.0.1:{Port}/");
+                Server.Console.WriteLine("Listening on " + $"{(isOpenSSL ? "wss" : "ws")}" + $"://127.0.0.1:{Port}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await bootstrapChannel.CloseAsync();
+                workGroup.ShutdownGracefullyAsync().Wait();
+                bossGroup.ShutdownGracefullyAsync().Wait();
+            }
+        }
+
+        public async void Dispose()
+        {
+            Server.Console.WriteLine(bootstrapChannel.LocalAddress.ToString() + " Closed");
+            await bootstrapChannel.CloseAsync();
+            await workGroup.ShutdownGracefullyAsync();
+            await bossGroup.ShutdownGracefullyAsync();
+        }
+    }
+
+    class WebHandler : SimpleChannelInboundHandler<object>
+    {
+        private Boolean IsSsl;
+        private WebSocketServer server;
+        WebSocketServerHandshaker handshaker;
+
+        public WebHandler(WebSocketServer server, bool isSsl)
+        {
+            this.server = server;
+            this.IsSsl = isSsl;
         }
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, object msg)
@@ -72,12 +147,7 @@ namespace ZyGame.Actor
             {
                 this.handshaker.HandshakeAsync(ctx.Channel, req);
                 var clientAddress = ctx.Channel.RemoteAddress.ToString();
-                root = ActorSystem.instance.GetRoot(req.Uri);
-                if (root is null)
-                {
-                    return;
-                }
-                root.AddChannel(ctx.Channel.Id, ctx.Channel);
+                //todo new cnnected
             }
         }
 
@@ -92,11 +162,8 @@ namespace ZyGame.Actor
 
             if (frame is PingWebSocketFrame)
             {
-                if (root is not null)
-                {
-                    root.Ping(ctx.Channel.Id);
-                    await ctx.WriteAsync(new PongWebSocketFrame((IByteBuffer)frame.Content.Retain()));
-                }
+
+                await ctx.WriteAsync(new PongWebSocketFrame((IByteBuffer)frame.Content.Retain()));
                 return;
             }
 
@@ -106,13 +173,13 @@ namespace ZyGame.Actor
                 int readableBytes = frame.Content.ReadableBytes;
                 var msg = frame.Content.GetString(0, readableBytes, Encoding.UTF8);
                 dynamic request = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(msg);
-                object response = await root.Recvie(ctx.Channel.Id, request);
-                if (response is null)
-                {
-                    return;
-                }
+                // object response = await root.Recvie(ctx.Channel.Id, request);
+                // if (response is null)
+                // {
+                //     return;
+                // }
                 frame = new TextWebSocketFrame();
-                frame.Content.WriteBytes(Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(response)));
+                frame.Content.WriteBytes(Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(default)));
                 await ctx.WriteAsync(frame.Retain());
                 return;
             }
@@ -123,13 +190,13 @@ namespace ZyGame.Actor
                 int readableBytes = frame.Content.ReadableBytes;
                 var msg = frame.Content.GetString(0, readableBytes, Encoding.UTF8);
                 dynamic request = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(msg);
-                object response = await root.Recvie(ctx.Channel.Id, request);
-                if (response is null)
-                {
-                    return;
-                }
+                // object response = await root.Recvie(ctx.Channel.Id, request);
+                // if (response is null)
+                // {
+                //     return;
+                // }
                 frame.Content.Clear();
-                frame.Content.WriteBytes(Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(response)));
+                frame.Content.WriteBytes(Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(default)));
                 await ctx.WriteAsync(frame.Retain());
             }
         }
@@ -159,22 +226,21 @@ namespace ZyGame.Actor
         public override void ExceptionCaught(IChannelHandlerContext ctx, Exception e)
         {
             Console.WriteLine($"{nameof(WebHandler)} {0}", e);
-            if (root is not null)
-                root.RemoveChannel(ctx.Channel.Id);
-            if (ctx != null)
-                ctx.CloseAsync();
 
+            if (ctx != null)
+            {
+                ctx.CloseAsync();
+            }
             //webSocketBroadCastEvent.Myevent -= Send;
         }
 
         public override Task CloseAsync(IChannelHandlerContext context)
         {
             //webSocketBroadCastEvent.Myevent -= Send;
-            if (root is not null)
-                root.RemoveChannel(context.Channel.Id);
+
             return base.CloseAsync(context);
         }
-        static string GetWebSocketLocation(IFullHttpRequest req)
+        string GetWebSocketLocation(IFullHttpRequest req)
         {
             bool result = req.Headers.TryGet(HttpHeaderNames.Host, out ICharSequence value);
             Debug.Assert(result, "Host header does not exist.");
@@ -191,5 +257,3 @@ namespace ZyGame.Actor
         }
     }
 }
-
-
