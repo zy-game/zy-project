@@ -106,21 +106,21 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
-            "DotNetty.Codecs.Http": {
-              "target": "Package",
-              "version": "[0.7.5, )"
-            },
-            "DotNetty.Handlers": {
-              "target": "Package",
-              "version": "[0.7.5, )"
-            },
             "MongoDB.Driver": {
               "target": "Package",
               "version": "[2.19.1, )"
             },
+            "MongoFramework": {
+              "target": "Package",
+              "version": "[0.28.1, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.3, )"
+            },
+            "mongocsharpdriver": {
+              "target": "Package",
+              "version": "[2.19.1, )"
             }
           },
           "imports": [

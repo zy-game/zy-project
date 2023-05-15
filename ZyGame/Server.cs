@@ -1,26 +1,11 @@
 ﻿using MongoDB.Driver;
-using ZyGame.Actor;
 using ZyGame.Config;
-using ZyGame.DB;
 using ZyGame.Service;
 
 namespace ZyGame
 {
     public static class Server
     {
-        public sealed class DBService
-        {
-            public static T Insert<T>(T datable) => Mongo.instance.Add(datable);
-
-            public static List<T> Where<T>(FilterDefinition<T> definition) => Mongo.instance.Where<T>(definition);
-
-            public static void Update<T>(FilterDefinition<T> definition, UpdateDefinition<T> update) => Mongo.instance.Update(definition, update);
-
-            public static void Delete<T>(FilterDefinition<T> definition) => Mongo.instance.Delete(definition);
-
-            public static long Count<T>() => Mongo.instance.Count<T>();
-        }
-
         public sealed class Console
         {
             public static void WriteLine(object message) => InternalConsole.WriteLine(message);
@@ -40,34 +25,28 @@ namespace ZyGame
             public static T GetOrLoadConfig<T>() where T : class, new() => ConfigMgr.instance.GetOrLooad<T>();
         }
 
-        public sealed class Actor
-        {
-            public static void Startup(string name, ushort port, bool IsSsl) => ActorSystem.instance.Startup(name, port, IsSsl);
-
-            public static void Shutdown() => ActorSystem.instance.Shutdown();
-
-            public static void BroadCast(string url, object Msg) => ActorSystem.instance.BroadCast(url, Msg);
-
-            public static void SendSync(string url, object message) => ActorSystem.instance.SendSync(url, message);
-
-            public static Task<object> SendAsync(string url, object message) => ActorSystem.instance.SendAsync(url, message);
-
-            public static void Register<T>(string url) where T : ActorBase => ActorSystem.instance.Register<T>(url);
-        }
-
         public sealed class Service
         {
-            public static Task Startup<T>() where T : IService => ServiceSystem.instance.Startup<T>();
+            public static Task Stratup(ushort port) => ServiceSystem.instance.Startup(port);
+            public static void AddService<T>(string url) where T : IService => ServiceSystem.instance.AddService(typeof(T), url);
 
-            public static Task Startup(Type type) => ServiceSystem.instance.Startup(type);
+            public static void AddService(Type type, string url) => ServiceSystem.instance.AddService(type, url);
 
-            public static Task Shutdown<T>() where T : IService => ServiceSystem.instance.Shutdown<T>();
+            public static Task Shutdown<T>() where T : IService => ServiceSystem.instance.Shutdown(typeof(T));
 
             public static Task Shutdown(Type type) => ServiceSystem.instance.Shutdown(type);
+
+            public static Task ShutdownAll() => ServiceSystem.instance.ShutdownAll();
 
             public static T GetService<T>() where T : IService => ServiceSystem.instance.GetService<T>();
 
             public static IService GetService(Type type) => ServiceSystem.instance.GetService(type);
+
+            public static void Broadcast(byte[] data) => ServiceSystem.instance.Broadcast(data);
+
+            public static void Send(string id, byte[] message) => ServiceSystem.instance.Send(id, message);
+
+            public static Task<object> SendAsync(string id, byte[] message) => ServiceSystem.instance.SendAsync(id, message);
         }
     }
 }
