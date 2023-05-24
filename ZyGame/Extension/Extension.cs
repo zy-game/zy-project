@@ -1,5 +1,4 @@
-﻿using MongoFramework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,47 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZyGame
 {
-    public class DBEntity
-    {
-        public string Id { get; set; }
-    }
-    public class DBContext<T> : MongoDbContext where T : DBEntity
-    {
-        public DBContext(string url) : base(MongoDbConnection.FromConnectionString("mongodb://140.143.97.63:27017/MyDatabase")) { }
-        public MongoDbSet<T> Entities { get; set; }
 
-        protected override void OnConfigureMapping(MappingBuilder mappingBuilder)
-        {
-            //mappingBuilder.Entity<T>().HasProperty(m => m.Id, b => b.HasElementName("MappedName")).ToCollection("MyCustomEntities");
-        }
-    }
-    public sealed class QueryString : IDisposable
-    {
-        private Dictionary<string, object> values = new Dictionary<string, object>();
-        public void Dispose()
-        {
-            values.Clear();
-            GC.SuppressFinalize(this);
-        }
-
-        public T GetField<T>(string name)
-        {
-            if (!values.TryGetValue(name, out object value))
-            {
-                return default;
-            }
-            return (T)value;
-        }
-
-        public void SetField(string name, object value)
-        {
-            if (values.ContainsKey(name))
-            {
-                throw new Exception("the field is already exist");
-            }
-            values[name] = value;
-        }
-    }
     public static class Extension
     {
         public static bool IsNullOrEmpty(this string value)
@@ -63,6 +22,20 @@ namespace ZyGame
             }
             catch (Exception e)
             {
+                Server.Console.WriteError(e);
+                return default;
+            }
+        }
+
+        public static T TryToObject<T>(this byte[] value)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(value));
+            }
+            catch (Exception e)
+            {
+                Server.Console.WriteError(e);
                 return default;
             }
         }
@@ -79,13 +52,20 @@ namespace ZyGame
             }
             catch (Exception e)
             {
+                Server.Console.WriteError(e);
                 return obj.ToString();
             }
         }
+
+        public static byte[] GetBuffer(this string value) => Encoding.UTF8.GetBytes(value);
 
         public static byte[] TryGetBuffer(this object obj)
         {
             return UTF8Encoding.UTF8.GetBytes(obj.TryToJson());
         }
+
+        public static string GetString(this byte[] bytes) => UTF8Encoding.UTF8.GetString(bytes);
+
+        public static T Getbject<T>(this byte[] bytes) => bytes.GetString().TryToObject<T>();
     }
 }

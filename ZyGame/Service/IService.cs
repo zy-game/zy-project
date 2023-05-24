@@ -10,14 +10,13 @@
         Task Shutdown();
     }
 
-    public interface ILogicService : IService
+    public interface IwebSocketService : IService
     {
         Task<object> Recvie(string id, byte[] message);
     }
 
-    public interface IHttpService : IService
+    public interface IHttpSocketService : IService
     {
-        Task<object> Post(byte[] bytes);
-        Task<object> Get(QueryString collection);
+        Task<object> Executedrequest(string path, byte[] bytes);
     }
 }

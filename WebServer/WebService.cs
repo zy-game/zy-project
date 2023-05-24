@@ -1,27 +1,25 @@
 ﻿using ZyGame;
 using ZyGame.Service;
 
-class WebService : IHttpService, ILogicService
+class WebService : IHttpSocketService, IwebSocketService
 {
-    class TestDb : DBEntity
-    {
-        public string name { get; set; }
-    }
-    private DBContext<TestDb> db_chat = new DBContext<TestDb>("");
-    public Task<dynamic> Get(QueryString query)
-    {
-        return Task.FromResult<object>("Hello World");
-    }
 
-    public Task<object> Post(byte[] bytes)
-    {
-        return Task.FromResult<object>("Hello World");
-    }
+    private DBContext<UserData> db_chat = new DBContext<UserData>("mongodb://140.143.97.63:27017/x_project");
 
     public Task<object> Recvie(string id, byte[] message)
     {
-        db_chat.Entities.Add(new TestDb() { name = id });
+        db_chat.Entities.Add(new UserData() { name = id });
         db_chat.SaveChanges();
         return Task.FromResult<object>(new { msg = "Hello World => " + db_chat.Entities.Count() });
+    }
+
+    public Task<object> Executedrequest(string path, byte[] bytes)
+    {
+        throw new NotImplementedException();
+    }
+
+    class UserData : DBEntity
+    {
+        public string name { get; set; }
     }
 }

@@ -45,7 +45,7 @@ namespace ZyGame.Service
             sock.Start();
             if (sock.IsListening)
             {
-                Server.Console.WriteLine(string.Format("Listening on port {0}", sock.Port));
+                Server.Console.WriteLine(string.Format("Listening address {0} on port {1}", sock.Address.ToString(), sock.Port));
             }
         }
         private async void OnMessage(WebSocketChannel handle, MessageEventArgs args)
@@ -60,7 +60,7 @@ namespace ZyGame.Service
                 Server.Console.WriteLine("Not find the service:" + handle.path);
                 return;
             }
-            ILogicService logicService = service as ILogicService;
+            IwebSocketService logicService = service as IwebSocketService;
             if (logicService is null)
             {
                 Server.Console.WriteLine("The Service Is NotImplemented ILogicService:" + handle.path);
@@ -94,50 +94,50 @@ namespace ZyGame.Service
             connectes.Remove(handle.ID);
         }
 
-        private async void ResponseHttpRequest(object sender, HttpRequestEventArgs e)
+        private async Task ResponseHttpRequest(object sender, HttpRequestEventArgs e)
         {
-            if (!service_urls.TryGetValue(e.Request.Url.LocalPath, out Type type) || !services.TryGetValue(type, out IService service))
+            int endIndex = e.Request.Url.LocalPath.IndexOf('/', 1);
+            string servicePath = e.Request.Url.LocalPath.Substring(0, endIndex);
+            if (!service_urls.TryGetValue(servicePath, out Type type) || !services.TryGetValue(type, out IService service))
             {
                 e.Response.StatusCode = 404;
                 e.Response.Close(UTF8Encoding.UTF8.GetBytes("Not Find The Service:" + e.Request.Url.LocalPath), true);
                 return;
             }
-            IHttpService httpService = service as IHttpService;
+            IHttpSocketService httpService = service as IHttpSocketService;
             string result = string.Empty;
             HttpMethod method = new HttpMethod(e.Request.HttpMethod);
             e.Response.StatusCode = 200;
             if (HttpMethod.Get == method)
             {
-                using QueryString query = new QueryString();
-                NameValueCollection collection = HttpUtility.ParseQueryString(e.Request.RawUrl);
-                foreach (var item in collection.AllKeys)
+                using Queryable query = new Queryable();
+                foreach (var item in e.Request.QueryString.Keys)
                 {
-                    query.SetField(item, collection.Get(item));
+                    query.SetField(item.ToString(), e.Request.QueryString.Get(item.ToString()));
                 }
-                result = (await httpService.Get(query)).TryToJson();
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(query);
+                byte[] temp = json.GetBuffer();
+                result = (await httpService.Executedrequest(e.Request.Url.LocalPath, temp)).TryToJson();
+                Server.Console.WriteLine(string.Format("GET {0} RESULT:{1}", e.Request.Url.LocalPath, Newtonsoft.Json.JsonConvert.SerializeObject(result)));
             }
             else if (HttpMethod.Post == method)
             {
                 byte[] temp = e.Request.InputStream.ReadBytes((int)e.Request.ContentLength64);
-                result = (await httpService.Post(temp)).TryToJson();
+                result = (await httpService.Executedrequest(e.Request.Url.LocalPath, temp)).TryToJson();
+                Server.Console.WriteLine(string.Format("POST {0} RESULT:{1}", e.Request.Url.LocalPath, Newtonsoft.Json.JsonConvert.SerializeObject(result)));
             }
-            else if (HttpMethod.Options == method)
-            {
-                e.Response.Headers.Set("Access-Control-Allow-Origin", "*");
-                e.Response.Headers.Set("Access-Control-Allow-Methods", "OPTIONS,POST,GET");
-                e.Response.Headers.Set("Access-Control-Allow-Headers", "origin, x-requested-with,access-control-allow-methods,access-control-allow-origin,access-control-allow-headers,content-type");
-                e.Response.Close();
-                return;
-            }
+            e.Response.Headers.Set("Access-Control-Allow-Origin", "*");
+            e.Response.Headers.Set("Access-Control-Allow-Methods", "OPTIONS,POST,GET");
+            e.Response.Headers.Set("Access-Control-Allow-Headers", "origin, x-requested-with,access-control-allow-methods,access-control-allow-origin,access-control-allow-headers,content-type");
             if (result.IsNullOrEmpty())
             {
                 e.Response.Close();
                 return;
             }
             byte[] bytes = UTF8Encoding.UTF8.GetBytes(result);
-            e.Response.ContentLength64 = bytes.LongLength;
             e.Response.ContentType = "application/json";
-            e.Response.Close(bytes, true);
+            e.Response.ContentLength64 = bytes.LongLength;
+            e.Response.Close(bytes, false);
         }
 
         public Task Shutdown(Type type)
